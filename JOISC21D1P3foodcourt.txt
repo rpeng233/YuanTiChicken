@@ -1,0 +1,70 @@
+Sweep shops from left to right and maintain a segment tree over event time.
+
+For each range update [L,R], activate it when the sweep reaches L and deactivate it after R. Thus, at shop x, the segment tree contains exactly the events affecting that shop, in chronological order.
+
+For queue length, represent each event as a function
+
+f(s)=max(s+a,b).
+Add K customers: (a,b)=(K,−∞)
+Remove K customers: (a,b)=(−K,0)
+
+These functions compose associatively:
+
+(a
+1
+	​
+
+,b
+1
+	​
+
+)∘(a
+2
+	​
+
+,b
+2
+	​
+
+)=(a
+1
+	​
+
++a
+2
+	​
+
+,max(b
+1
+	​
+
++a
+2
+	​
+
+,b
+2
+	​
+
+)).
+
+A prefix query up to a type-3 event gives the current queue size.
+
+Also store, in each segment-tree node, the total number of customers added. Suppose by query time:
+
+T customers have been added in total,
+S customers remain.
+
+Then T−S customers have left, all from the front. Therefore, the B-th remaining customer is the
+
+T−S+B
+
+-th customer in global insertion order.
+
+Use the segment tree’s add-count sums to find the join event containing that insertion rank, and output its group. If S<B, output 0.
+
+Complexity:
+
+O((N+Q)logQ)
+
+time and O(N+Q) memory.

@@ -1,0 +1,18 @@
+## Summary of the main ideas
+
+The key insight is to transform the problem into a geometric one on a 2D plane.
+
+**Main idea 1: Coordinate transformation**  
+Each maneuver is represented as a point \((x, y)\) where \(x\) is the position in the sequence and \(y\) is the difficulty. The condition for a "good" pair of maneuvers (i, j) with i < j is that the difficulty of i is greater than the difficulty of j, and there is no maneuver between them with difficulty between the two values. This is equivalent to saying that the point (i, difficulty_i) and (j, difficulty_j) form a "visible" pair when looking from left to right, with the left point higher than the right point.
+
+**Main idea 2: Using a stack (Cartesian tree)**  
+This visibility condition is exactly the definition of edges in a Cartesian tree (or a max-heap tree) built on the sequence. The Cartesian tree connects each element to its nearest greater element to the left and right. The number of "good" pairs equals the number of edges in this tree, which is exactly \(n-1\) (since it's a tree on n nodes). This gives a simple answer for the basic version.
+
+**Main idea 3: Handling the "aerobatic" twist**  
+The problem adds a twist: you can choose a contiguous subarray and reverse it. This changes the Cartesian tree structure. The goal is to maximize the number of "good" pairs after one reversal. The key observation is that reversing a subarray only affects the visibility relationships involving elements inside the subarray and those just outside its boundaries.
+
+**Main idea 4: Efficient computation via monotonic stacks and segment trees**  
+To find the optimal reversal, we need to consider all possible subarrays efficiently. This is done by preprocessing the nearest greater elements to the left and right for each position. Then, for each possible left endpoint of the reversal, we can use a sweep line with a segment tree or Fenwick tree to compute the best right endpoint. The contribution of a reversal can be computed by counting how many new visible pairs appear and how many old ones disappear, using the precomputed nearest greater elements.
+
+**Main idea 5: Final answer**  
+The answer is the initial number of good pairs (n-1) plus the maximum possible increase achievable by one reversal. The increase is computed by evaluating all candidate reversals in O(n log n) time using the data structures described.

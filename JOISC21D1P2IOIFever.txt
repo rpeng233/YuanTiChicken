@@ -1,0 +1,19 @@
+## Summary of Main Ideas
+
+The problem asks for the minimum possible number of IOI fever infections given a set of people with known infection times and locations, where infection spreads when an infected person meets a susceptible person at the same location at the same time.
+
+**Key insight:** The infection spread can be modeled as a graph where people are nodes and edges represent possible infection transmissions (same time and location). The problem reduces to finding the minimum number of initially infected people such that all eventually become infected.
+
+**Main ideas:**
+
+1. **Time-space discretization:** Group people by (time, location) pairs. Within each group, if at least one person is infected, all become infected instantly.
+
+2. **Graph construction:** Create a directed graph where edges go from earlier time groups to later time groups if they share the same location. This captures the temporal spread of infection.
+
+3. **Minimum sources problem:** The answer is the size of a minimum set of source nodes (initial infections) that can reach all nodes in this DAG. This is equivalent to finding the minimum number of source strongly connected components (SCCs) after condensation.
+
+4. **SCC condensation:** Compute SCCs of the graph. In the condensed DAG, the minimum number of sources needed equals the number of nodes with in-degree zero (since you must start in each such component).
+
+5. **Optimization:** Since constraints can be large, avoid explicit O(N²) edge construction. Instead, for each location, process people sorted by time and connect consecutive time groups with edges, which captures all necessary transmission paths.
+
+**Final answer:** Count the number of SCCs in the condensed graph that have no incoming edges from other SCCs. This gives the minimum number of initially infected people needed to guarantee everyone gets infected.

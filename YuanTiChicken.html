@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Solution Similarity Comparator — Powered by DeepSeek</title>
+    <style>
+        :root {
+            --bg: #f7f8fa;
+            --card-bg: #ffffff;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --text: #1e1e2e;
+            --text-secondary: #5b5b6c;
+            --border: #e2e4ea;
+            --accent-light: #eef2ff;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.10), 0 4px 8px rgba(0, 0, 0, 0.05);
+            --radius: 14px;
+            --radius-sm: 8px;
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1050px;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            padding: 36px 32px 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 4px;
+        }
+        .header .icon-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+        .header .icon-row svg {
+            width: 32px;
+            height: 32px;
+            color: var(--primary);
+        }
+        .header h1 {
+            font-size: 1.7rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text);
+        }
+        .header .subtitle {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        /* API Key Section */
+        .api-key-section {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            background: var(--accent-light);
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            border: 1px solid #dde0f0;
+        }
+        .api-key-section label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--text);
+            white-space: nowrap;
+            letter-spacing: 0.01em;
+        }
+        .api-key-section input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            transition: var(--transition);
+            background: #fff;
+            letter-spacing: 0.02em;
+        }
+        .api-key-section input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        .api-key-section .btn-save-key {
+            padding: 10px 16px;
+            background: #fff;
+            border: 1.5px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: var(--transition);
+            white-space: nowrap;
+            color: var(--text);
+        }
+        .api-key-section .btn-save-key:hover {
+            background: #f0f1f5;
+            border-color: #c5c8d4;
+        }
+        .api-key-section .key-status {
+            font-size: 0.78rem;
+            font-weight: 500;
+            padding: 4px 10px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+        .key-status.saved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .key-status.missing {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        /* Text Areas */
+        .textboxes-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 700px) {
+            .textboxes-row {
+                grid-template-columns: 1fr;
+            }
+            .container {
+                padding: 20px 16px 18px;
+            }
+            .header h1 {
+                font-size: 1.35rem;
+            }
+        }
+        .textbox-card {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .textbox-card .card-label {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.01em;
+        }
+        .textbox-card .card-label .badge {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+        .badge.solution-a {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+        .badge.solution-b {
+            background: #fce7f3;
+            color: #9d174d;
+        }
+        .textbox-card textarea {
+            width: 100%;
+            height: 220px;
+            padding: 16px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            resize: vertical;
+            transition: var(--transition);
+            background: #fafbfc;
+            line-height: 1.55;
+            color: var(--text);
+        }
+        .textbox-card textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.07);
+            background: #fff;
+        }
+        .textbox-card textarea::placeholder {
+            color: #b0b5c0;
+        }
+        .char-count {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            text-align: right;
+        }
+
+        /* Generate Solution Row (inside Solution A card) */
+        .generate-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+            background: #f8f9fc;
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+        }
+        .generate-row input {
+            flex: 1;
+            min-width: 140px;
+            padding: 9px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            transition: var(--transition);
+            background: #fff;
+        }
+        .generate-row input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        .generate-row button {
+            padding: 9px 16px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .generate-row button:hover:not(:disabled) {
+            background: var(--primary-hover);
+        }
+        .generate-row button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .generate-row .gen-spinner {
+            display: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        .generate-row button.loading .gen-spinner {
+            display: inline-block;
+        }
+        .generate-row button.loading .gen-btn-text {
+            display: none;
+        }
+
+        /* Save row */
+        .save-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+            background: #f8f9fc;
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            margin-top: 2px;
+        }
+        .save-row .save-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+        .save-row input {
+            flex: 1;
+            min-width: 120px;
+            padding: 9px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            transition: var(--transition);
+            background: #fff;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+        }
+        .save-row input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        .save-row .btn-save {
+            padding: 9px 18px;
+            background: #059669;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .save-row .btn-save:hover {
+            background: #047857;
+        }
+        .save-row .btn-save:active {
+            transform: scale(0.96);
+        }
+        .save-row .save-feedback {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            min-width: 60px;
+        }
+        .save-row .save-feedback.saved {
+            color: #065f46;
+        }
+        .save-row .save-feedback.error {
+            color: #b91c1c;
+        }
+
+        /* Compare Buttons Row */
+        .compare-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-compare {
+            padding: 14px 40px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 0.01em;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+        }
+        .btn-compare:hover:not(:disabled) {
+            background: var(--primary-hover);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+        }
+        .btn-compare:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: var(--shadow-sm);
+        }
+        .btn-compare:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-compare .spinner {
+            display: none;
+            width: 18px;
+            height: 18px;
+            border: 2.5px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        .btn-compare.loading .spinner {
+            display: inline-block;
+        }
+        .btn-compare.loading .btn-text {
+            display: none;
+        }
+
+        /* Bulk Compare Section */
+        .bulk-section {
+            background: #fafbfc;
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-sm);
+            padding: 20px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .bulk-section .bulk-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+        }
+        .bulk-section .bulk-header label {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .bulk-section input[type="file"] {
+            flex: 1;
+            min-width: 200px;
+            padding: 8px 6px;
+            border: 1.5px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            background: #fff;
+            cursor: pointer;
+        }
+        .bulk-section input[type="file"]::file-selector-button {
+            padding: 6px 14px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-right: 10px;
+        }
+        .bulk-section input[type="file"]::file-selector-button:hover {
+            background: var(--primary-hover);
+        }
+        .bulk-section .bulk-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+        }
+        .btn-bulk-compare {
+            padding: 12px 32px;
+            background: #0b7e5e;
+            color: #fff;
+            border: none;
+            border-radius: 30px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-bulk-compare:hover:not(:disabled) {
+            background: #0a6b4f;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+        .btn-bulk-compare:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-bulk-compare .bulk-spinner {
+            display: none;
+            width: 18px;
+            height: 18px;
+            border: 2.5px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        .btn-bulk-compare.loading .bulk-spinner {
+            display: inline-block;
+        }
+        .btn-bulk-compare.loading .bulk-btn-text {
+            display: none;
+        }
+        .bulk-progress {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .bulk-results {
+            margin-top: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .bulk-result-item {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            transition: var(--transition);
+        }
+        .bulk-result-item:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+        .bulk-result-item .item-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        .bulk-result-item .item-filename {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text);
+        }
+        .bulk-result-item .item-score {
+            font-weight: 800;
+            font-size: 1.1rem;
+            padding: 2px 12px;
+            border-radius: 20px;
+            background: var(--accent-light);
+            color: var(--primary);
+        }
+        .bulk-result-item .item-score.high {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .bulk-result-item .item-score.medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .bulk-result-item .item-score.low {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .bulk-result-item .item-summary {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+        .bulk-result-item .item-details {
+            font-size: 0.8rem;
+            color: var(--text);
+            background: #f8f9fc;
+            padding: 10px 12px;
+            border-radius: 6px;
+            margin-top: 4px;
+            display: none;
+        }
+        .bulk-result-item .item-details.visible {
+            display: block;
+        }
+        .bulk-result-item .btn-toggle-details {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.75rem;
+            padding: 2px 0;
+            text-decoration: underline;
+            align-self: flex-start;
+        }
+        .bulk-result-item .btn-toggle-details:hover {
+            color: var(--primary-hover);
+        }
+        .bulk-result-item .item-error {
+            color: #b91c1c;
+            font-size: 0.85rem;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Results Panel (single) */
+        .results-panel {
+            display: none;
+            background: #fafbfc;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 24px;
+            flex-direction: column;
+            gap: 18px;
+            animation: fadeInUp 0.4s ease;
+        }
+        .results-panel.visible {
+            display: flex;
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .score-row {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+        .score-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.6rem;
+            flex-shrink: 0;
+            position: relative;
+        }
+        .score-circle.high {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .score-circle.medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .score-circle.low {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .score-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        .score-detail {
+            font-size: 0.9rem;
+            color: var(--text);
+            line-height: 1.5;
+        }
+        .analysis-block {
+            background: #fff;
+            border-radius: var(--radius-sm);
+            padding: 16px 18px;
+            border: 1px solid var(--border);
+        }
+        .analysis-block h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.01em;
+        }
+        .analysis-block p,
+        .analysis-block ul {
+            font-size: 0.88rem;
+            color: var(--text);
+            line-height: 1.6;
+        }
+        .analysis-block ul {
+            padding-left: 20px;
+        }
+        .analysis-block li {
+            margin-bottom: 4px;
+        }
+        .error-message {
+            background: #fef2f2;
+            color: #991b1b;
+            padding: 14px 18px;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            font-size: 0.9rem;
+            border: 1px solid #fecaca;
+        }
+        .generate-error {
+            color: #b91c1c;
+            font-size: 0.75rem;
+            margin-top: 2px;
+            padding-left: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="icon-row">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="16"></line>
+                    <line x1="8" y1="12" x2="16" y2="12"></line>
+                </svg>
+                <h1>Solution Similarity Comparator</h1>
+            </div>
+            <p class="subtitle">Paste two solutions or generate one automatically, then let <strong>DeepSeek</strong> analyze their similarity</p>
+        </div>
+
+        <!-- API Key Section -->
+        <div class="api-key-section" id="apiKeySection">
+            <label for="apiKeyInput">🔑 DeepSeek API Key:</label>
+            <input type="password" id="apiKeyInput" placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" autocomplete="off" />
+            <button class="btn-save-key" id="btnSaveKey">Save Key</button>
+            <span class="key-status missing" id="keyStatus">No key saved</span>
+        </div>
+
+        <!-- Text Areas -->
+        <div class="textboxes-row">
+            <!-- Solution A card -->
+            <div class="textbox-card">
+                <div class="card-label">
+                    <span class="badge solution-a">Solution A</span> Problem 1 Solution
+                </div>
+                <div class="generate-row">
+                    <input type="text" id="problemIdInput" placeholder="Problem ID / description (e.g., LeetCode 1)" />
+                    <button id="btnGenerateSolution">
+                        <span class="gen-btn-text">⚡ Generate</span>
+                        <span class="gen-spinner"></span>
+                    </button>
+                </div>
+                <div id="generateError" class="generate-error"></div>
+                <textarea id="solutionA" placeholder="Paste the first solution here, or use the generator above...&#10;&#10;Example: Use a hash map to store frequencies, then iterate through the array to find duplicates in O(n) time."></textarea>
+                <div class="save-row">
+                    <span class="save-label">💾 Save as:</span>
+                    <input type="text" id="saveFilename" placeholder="filename.txt" value="solution.txt" />
+                    <button class="btn-save" id="btnSaveSolution">⬇ Save to File</button>
+                    <span class="save-feedback" id="saveFeedback"></span>
+                </div>
+                <span class="char-count" id="charCountA">0 characters</span>
+            </div>
+            <!-- Solution B -->
+            <div class="textbox-card">
+                <div class="card-label">
+                    <span class="badge solution-b">Solution B</span> Problem 2 Solution
+                </div>
+                <textarea id="solutionB" placeholder="Paste the second solution here...&#10;&#10;Example: Sort the array first, then compare adjacent elements to find duplicates in O(n log n) time."></textarea>
+                <span class="char-count" id="charCountB">0 characters</span>
+            </div>
+        </div>
+
+        <!-- Compare Actions -->
+        <div class="compare-actions">
+            <button class="btn-compare" id="btnCompare">
+                <span class="btn-text">🔍 Compare Solutions</span>
+                <span class="spinner"></span>
+            </button>
+        </div>
+
+        <!-- Single Results Panel -->
+        <div class="results-panel" id="resultsPanel">
+            <!-- Dynamically filled -->
+        </div>
+
+        <!-- Bulk Compare Section -->
+        <div class="bulk-section">
+            <div class="bulk-header">
+                <label for="bulkFileInput">📂 Bulk Compare (multiple .txt files)</label>
+                <input type="file" id="bulkFileInput" accept=".txt" multiple />
+            </div>
+            <div class="bulk-actions">
+                <button class="btn-bulk-compare" id="btnBulkCompare">
+                    <span class="bulk-btn-text">⚡ Bulk Compare</span>
+                    <span class="bulk-spinner"></span>
+                </button>
+                <span class="bulk-progress" id="bulkProgress"></span>
+            </div>
+            <div class="bulk-results" id="bulkResults">
+                <!-- Results will be rendered here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // DOM Elements
+            const apiKeyInput = document.getElementById('apiKeyInput');
+            const btnSaveKey = document.getElementById('btnSaveKey');
+            const keyStatus = document.getElementById('keyStatus');
+            const solutionA = document.getElementById('solutionA');
+            const solutionB = document.getElementById('solutionB');
+            const charCountA = document.getElementById('charCountA');
+            const charCountB = document.getElementById('charCountB');
+            const btnCompare = document.getElementById('btnCompare');
+            const resultsPanel = document.getElementById('resultsPanel');
+
+            // Generation
+            const problemIdInput = document.getElementById('problemIdInput');
+            const btnGenerateSolution = document.getElementById('btnGenerateSolution');
+            const generateError = document.getElementById('generateError');
+
+            // Save
+            const saveFilename = document.getElementById('saveFilename');
+            const btnSaveSolution = document.getElementById('btnSaveSolution');
+            const saveFeedback = document.getElementById('saveFeedback');
+
+            // Bulk
+            const bulkFileInput = document.getElementById('bulkFileInput');
+            const btnBulkCompare = document.getElementById('btnBulkCompare');
+            const bulkProgress = document.getElementById('bulkProgress');
+            const bulkResults = document.getElementById('bulkResults');
+
+            // DeepSeek API
+            const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
+            const DEEPSEEK_MODEL = 'deepseek-chat';
+
+            // Load saved API key
+            function loadSavedKey() {
+                const saved = localStorage.getItem('deepseek_api_key');
+                if (saved) {
+                    apiKeyInput.value = saved;
+                    keyStatus.textContent = '✅ Key saved';
+                    keyStatus.className = 'key-status saved';
+                } else {
+                    apiKeyInput.value = '';
+                    keyStatus.textContent = 'No key saved';
+                    keyStatus.className = 'key-status missing';
+                }
+            }
+
+            btnSaveKey.addEventListener('click', () => {
+                const key = apiKeyInput.value.trim();
+                if (key) {
+                    if (!key.startsWith('sk-')) {
+                        alert('⚠️ The API key should typically start with "sk-". Please double-check your DeepSeek API key.');
+                        return;
+                    }
+                    localStorage.setItem('deepseek_api_key', key);
+                    keyStatus.textContent = '✅ Key saved';
+                    keyStatus.className = 'key-status saved';
+                } else {
+                    localStorage.removeItem('deepseek_api_key');
+                    keyStatus.textContent = 'No key saved';
+                    keyStatus.className = 'key-status missing';
+                }
+            });
+
+            // Character counters
+            function updateCharCountA() {
+                charCountA.textContent = solutionA.value.length + ' characters';
+            }
+
+            function updateCharCountB() {
+                charCountB.textContent = solutionB.value.length + ' characters';
+            }
+            solutionA.addEventListener('input', updateCharCountA);
+            solutionB.addEventListener('input', updateCharCountB);
+
+            // Get API key
+            function getApiKey() {
+                const fromStorage = localStorage.getItem('deepseek_api_key');
+                const fromInput = apiKeyInput.value.trim();
+                return fromInput || fromStorage || '';
+            }
+
+            // ========== GENERATE SOLUTION ==========
+            async function generateSolution() {
+                const apiKey = getApiKey();
+                if (!apiKey) {
+                    alert('Please enter and save your DeepSeek API key first.');
+                    apiKeyInput.focus();
+                    return;
+                }
+                const problemDesc = problemIdInput.value.trim();
+                if (!problemDesc) {
+                    generateError.textContent = 'Please enter a problem ID or description.';
+                    return;
+                }
+                generateError.textContent = '';
+
+                btnGenerateSolution.classList.add('loading');
+                btnGenerateSolution.disabled = true;
+
+                const prompt =
+                    `You are an expert competitive programmer. Build a detailed well-structured solution for the following programming problem.
+
+        Problem: ${problemDesc}
+
+        Then summarize this solution. Output only its summary of its main ideas, without problem statement, without code.`;
+
+                try {
+                    const response = await fetch(DEEPSEEK_API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${apiKey}`,
+                        },
+                        body: JSON.stringify({
+                            model: DEEPSEEK_MODEL,
+                            messages: [{ role: 'user', content: prompt }],
+                            temperature: 0.4,
+                            max_tokens: 2000,
+                        }),
+                    });
+
+                    if (!response.ok) {
+                        const errorBody = await response.text();
+                        let errorMsg = `Generation failed (status ${response.status})`;
+                        try {
+                            const errJson = JSON.parse(errorBody);
+                            if (errJson.error?.message) errorMsg = errJson.error.message;
+                        } catch (e) {
+                            if (errorBody.length < 200) errorMsg += ': ' + errorBody;
+                        }
+                        throw new Error(errorMsg);
+                    }
+
+                    const data = await response.json();
+                    const generatedText = data.choices?.[0]?.message?.content?.trim();
+                    if (!generatedText) throw new Error('Empty response from DeepSeek.');
+
+                    solutionA.value = generatedText;
+                    updateCharCountA();
+                    solutionA.dispatchEvent(new Event('input', { bubbles: true }));
+                    generateError.textContent = '✅ Solution generated successfully!';
+                    generateError.style.color = '#065f46';
+
+                    const safeName = problemDesc.replace(/[^a-zA-Z0-9\-_]/g, '_').slice(0, 40) + '.txt';
+                    saveFilename.value = safeName;
+                } catch (error) {
+                    console.error('Generation error:', error);
+                    let message = error.message || 'Unknown error.';
+                    if (message.includes('Insufficient Balance') || message.includes('quota')) {
+                        message = 'Insufficient balance or quota. Top up at platform.deepseek.com.';
+                    } else if (message.includes('auth') || message.includes('401') || message.includes('403')) {
+                        message = 'Invalid API key. Check your key.';
+                    } else if (message.includes('rate') || message.includes('429')) {
+                        message = 'Rate limit exceeded. Wait a moment.';
+                    }
+                    generateError.textContent = '❌ ' + message;
+                    generateError.style.color = '#b91c1c';
+                } finally {
+                    btnGenerateSolution.classList.remove('loading');
+                    btnGenerateSolution.disabled = false;
+                }
+            }
+
+            btnGenerateSolution.addEventListener('click', generateSolution);
+            problemIdInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    generateSolution();
+                }
+            });
+
+            // ========== SAVE ==========
+            function saveSolutionToFile() {
+                const content = solutionA.value;
+                if (!content.trim()) {
+                    saveFeedback.textContent = '⚠️ Nothing to save.';
+                    saveFeedback.className = 'save-feedback error';
+                    return;
+                }
+                let filename = saveFilename.value.trim();
+                if (!filename) {
+                    filename = 'solution.txt';
+                    saveFilename.value = filename;
+                }
+                if (!filename.includes('.')) {
+                    filename += '.txt';
+                    saveFilename.value = filename;
+                }
+                try {
+                    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    saveFeedback.textContent = '✅ Saved!';
+                    saveFeedback.className = 'save-feedback saved';
+                    setTimeout(() => {
+                        saveFeedback.textContent = '';
+                        saveFeedback.className = 'save-feedback';
+                    }, 3000);
+                } catch (err) {
+                    console.error('Save error:', err);
+                    saveFeedback.textContent = '❌ Save failed.';
+                    saveFeedback.className = 'save-feedback error';
+                }
+            }
+
+            btnSaveSolution.addEventListener('click', saveSolutionToFile);
+            saveFilename.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    saveSolutionToFile();
+                }
+            });
+
+            // ========== COMPARISON CORE ==========
+            function buildPrompt(textA, textB) {
+                return `You are a programming contest problem setter. Compare the following two solutions from different problems and evaluate their **semantic and structural similarity** on a scale of 0 to 100. Specifically, whether solving one problem is likely to help for solving the other.
+
+        Please respond with a valid JSON object only (no markdown, no code fences, just raw JSON) in this exact format:
+        {
+          "similarity_score": <number 0-100>,
+          "level": "<'high' | 'medium' | 'low'>",
+          "summary": "<one concise paragraph summarizing the comparison>",
+          "key_similarities": ["<point 1>", "<point 2>", "..."],
+          "key_differences": ["<point 1>", "<point 2>", "..."]
+        }
+
+        --- SOLUTION A ---
+        ${textA}
+
+        --- SOLUTION B ---
+        ${textB}
+
+        Respond ONLY with the JSON object.`;
+            }
+
+            function parseResponse(content) {
+                let jsonStr = content.trim();
+                const fenceMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
+                if (fenceMatch) jsonStr = fenceMatch[1].trim();
+                const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
+                if (jsonMatch) jsonStr = jsonMatch[0];
+                const parsed = JSON.parse(jsonStr);
+                if (typeof parsed.similarity_score !== 'number' || parsed.similarity_score < 0 || parsed.similarity_score >
+                    100) {
+                    throw new Error('Invalid similarity_score in response');
+                }
+                return {
+                    similarityScore: Math.round(parsed.similarity_score),
+                    level: parsed.level || (parsed.similarity_score >= 70 ? 'high' : parsed.similarity_score >= 40 ?
+                        'medium' : 'low'),
+                    summary: parsed.summary || 'No summary provided.',
+                    keySimilarities: Array.isArray(parsed.key_similarities) ? parsed.key_similarities : [],
+                    keyDifferences: Array.isArray(parsed.key_differences) ? parsed.key_differences : [],
+                };
+            }
+
+            // Perform a single comparison; returns parsed result.
+            async function performComparison(textA, textB, apiKey) {
+                const response = await fetch(DEEPSEEK_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`,
+                    },
+                    body: JSON.stringify({
+                        model: DEEPSEEK_MODEL,
+                        messages: [{ role: 'user', content: buildPrompt(textA, textB) }],
+                        temperature: 0.3,
+                        max_tokens: 1500,
+                    }),
+                });
+
+                if (!response.ok) {
+                    const errorBody = await response.text();
+                    let errorMsg = `API request failed with status ${response.status}`;
+                    try {
+                        const errJson = JSON.parse(errorBody);
+                        if (errJson.error?.message) errorMsg = errJson.error.message;
+                    } catch (e) {
+                        if (errorBody.length < 200) errorMsg += ': ' + errorBody;
+                    }
+                    throw new Error(errorMsg);
+                }
+
+                const data = await response.json();
+                const content = data.choices?.[0]?.message?.content;
+                if (!content) throw new Error('Empty response from DeepSeek API.');
+                return parseResponse(content);
+            }
+
+            // ========== SINGLE COMPARE ==========
+            function displayResults(data) {
+                const score = data.similarityScore;
+                let circleClass = score >= 70 ? 'high' : score >= 40 ? 'medium' : 'low';
+
+                const similaritiesHTML = data.keySimilarities.length > 0 ?
+                    '<ul>' + data.keySimilarities.map(s => `<li>${escapeHTML(s)}</li>`).join('') + '</ul>' :
+                    '<p>No key similarities identified.</p>';
+                const differencesHTML = data.keyDifferences.length > 0 ?
+                    '<ul>' + data.keyDifferences.map(s => `<li>${escapeHTML(s)}</li>`).join('') + '</ul>' :
+                    '<p>No key differences identified.</p>';
+
+                resultsPanel.innerHTML = `
+                    <div class="score-row">
+                        <div class="score-circle ${circleClass}">${score}%</div>
+                        <div>
+                            <div class="score-label">Similarity Level: <strong style="text-transform:capitalize;">${data.level}</strong></div>
+                            <div class="score-detail">${escapeHTML(data.summary)}</div>
+                        </div>
+                    </div>
+                    <div class="analysis-block">
+                        <h3>✅ Key Similarities</h3>
+                        ${similaritiesHTML}
+                    </div>
+                    <div class="analysis-block">
+                        <h3>🔀 Key Differences</h3>
+                        ${differencesHTML}
+                    </div>
+                `;
+                resultsPanel.classList.add('visible');
+                resultsPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            function displayError(message) {
+                resultsPanel.innerHTML = `<div class="error-message">⚠️ <strong>Error:</strong> ${escapeHTML(message)}</div>`;
+                resultsPanel.classList.add('visible');
+            }
+
+            function escapeHTML(str) {
+                const div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
+            }
+
+            async function compareSingle() {
+                const apiKey = getApiKey();
+                if (!apiKey) {
+                    alert('Please enter and save your DeepSeek API key first.');
+                    apiKeyInput.focus();
+                    return;
+                }
+                const textA = solutionA.value.trim();
+                const textB = solutionB.value.trim();
+                if (!textA || !textB) {
+                    alert('Please fill in both solution text boxes before comparing.');
+                    return;
+                }
+                if (textA.length < 10 || textB.length < 10) {
+                    alert('Each solution should be at least 10 characters long for a meaningful comparison.');
+                    return;
+                }
+
+                btnCompare.classList.add('loading');
+                btnCompare.disabled = true;
+                resultsPanel.classList.remove('visible');
+                resultsPanel.innerHTML = '';
+
+                try {
+                    const result = await performComparison(textA, textB, apiKey);
+                    displayResults(result);
+                } catch (error) {
+                    console.error('Comparison error:', error);
+                    let message = error.message || 'An unknown error occurred.';
+                    if (message.includes('Insufficient Balance') || message.includes('quota')) {
+                        message = 'Insufficient balance or quota. Top up at platform.deepseek.com.';
+                    } else if (message.includes('auth') || message.includes('401') || message.includes('403')) {
+                        message = 'Invalid API key. Check your key.';
+                    } else if (message.includes('rate') || message.includes('429')) {
+                        message = 'Rate limit exceeded. Wait a moment.';
+                    }
+                    displayError(message);
+                } finally {
+                    btnCompare.classList.remove('loading');
+                    btnCompare.disabled = false;
+                }
+            }
+
+            btnCompare.addEventListener('click', compareSingle);
+
+            // Ctrl+Enter shortcut for single compare
+            [solutionA, solutionB].forEach(textarea => {
+                textarea.addEventListener('keydown', (e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                        e.preventDefault();
+                        compareSingle();
+                    }
+                });
+            });
+
+            // ========== BULK COMPARE ==========
+            async function bulkCompare() {
+                const apiKey = getApiKey();
+                if (!apiKey) {
+                    alert('Please enter and save your DeepSeek API key first.');
+                    apiKeyInput.focus();
+                    return;
+                }
+                const textA = solutionA.value.trim();
+                if (!textA) {
+                    alert('Please provide Solution A (the reference solution) before bulk comparing.');
+                    return;
+                }
+                if (textA.length < 10) {
+                    alert('Solution A should be at least 10 characters long.');
+                    return;
+                }
+
+                const files = bulkFileInput.files;
+                if (files.length === 0) {
+                    alert('Please select at least one .txt file.');
+                    return;
+                }
+
+                // Disable button and show progress
+                btnBulkCompare.classList.add('loading');
+                btnBulkCompare.disabled = true;
+                bulkProgress.textContent = 'Reading files...';
+                bulkResults.innerHTML = '';
+
+                // Read all files
+                const fileContents = [];
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    if (!file.name.toLowerCase().endsWith('.txt')) {
+                        // skip non-txt? Or warn? We'll warn and skip.
+                        bulkProgress.textContent = `Skipping non-.txt file: ${file.name}`;
+                        continue;
+                    }
+                    try {
+                        const content = await file.text();
+                        if (content.trim().length < 10) {
+                            bulkProgress.textContent = `Skipping ${file.name} (too short)`;
+                            continue;
+                        }
+                        fileContents.push({ name: file.name, content: content.trim() });
+                    } catch (err) {
+                        console.error(`Error reading ${file.name}:`, err);
+                        bulkProgress.textContent = `Error reading ${file.name}`;
+                    }
+                }
+
+                if (fileContents.length === 0) {
+                    bulkProgress.textContent = 'No valid .txt files with sufficient content.';
+                    btnBulkCompare.classList.remove('loading');
+                    btnBulkCompare.disabled = false;
+                    return;
+                }
+
+                bulkProgress.textContent = `Starting comparison of ${fileContents.length} files...`;
+
+                const results = [];
+                const total = fileContents.length;
+                let completed = 0;
+
+                // Process sequentially to avoid overwhelming API
+                for (const item of fileContents) {
+                    try {
+                        const result = await performComparison(textA, item.content, apiKey);
+                        results.push({
+                            filename: item.name,
+                            ...result,
+                            error: null
+                        });
+                    } catch (err) {
+                        console.error(`Error comparing ${item.name}:`, err);
+                        let message = err.message || 'Unknown error.';
+                        if (message.includes('Insufficient Balance') || message.includes('quota')) {
+                            message = 'Insufficient balance or quota.';
+                        } else if (message.includes('auth') || message.includes('401') || message.includes('403')) {
+                            message = 'Invalid API key.';
+                        } else if (message.includes('rate') || message.includes('429')) {
+                            message = 'Rate limit exceeded.';
+                        }
+                        results.push({
+                            filename: item.name,
+                            similarityScore: null,
+                            level: null,
+                            summary: null,
+                            keySimilarities: [],
+                            keyDifferences: [],
+                            error: message
+                        });
+                    }
+                    completed++;
+                    bulkProgress.textContent = `Progress: ${completed}/${total}`;
+                }
+
+                // Sort results by similarity descending (errors at the end)
+                results.sort((a, b) => {
+                    if (a.error && !b.error) return 1;
+                    if (!a.error && b.error) return -1;
+                    if (a.error && b.error) return 0;
+                    return b.similarityScore - a.similarityScore;
+                });
+
+                // Render results
+                renderBulkResults(results);
+                bulkProgress.textContent = `✅ Done. ${results.filter(r => !r.error).length} succeeded, ${results.filter(r => r.error).length} failed.`;
+                btnBulkCompare.classList.remove('loading');
+                btnBulkCompare.disabled = false;
+            }
+
+            function renderBulkResults(results) {
+                let html = '';
+                for (const item of results) {
+                    const score = item.similarityScore;
+                    let scoreClass = '';
+                    let scoreDisplay = '';
+                    if (item.error) {
+                        scoreDisplay = '❌ Error';
+                        scoreClass = 'low';
+                    } else {
+                        scoreClass = score >= 70 ? 'high' : score >= 40 ? 'medium' : 'low';
+                        scoreDisplay = score + '%';
+                    }
+
+                    const detailsId = 'bulk-detail-' + Math.random().toString(36).substr(2, 8);
+                    const summaryText = item.error ? item.error : (item.summary || 'No summary.');
+                    const hasDetails = !item.error && (item.keySimilarities.length > 0 || item.keyDifferences.length > 0);
+
+                    html += `
+                        <div class="bulk-result-item">
+                            <div class="item-header">
+                                <span class="item-filename">📄 ${escapeHTML(item.filename)}</span>
+                                <span class="item-score ${scoreClass}">${scoreDisplay}</span>
+                                <button class="btn-toggle-details" data-target="${detailsId}">Show details</button>
+                            </div>
+                            <div class="item-summary">${escapeHTML(summaryText)}</div>
+                            <div class="item-details" id="${detailsId}">
+                                ${item.error ? '' : `
+                                    <div><strong>Similarities:</strong></div>
+                                    <ul>${item.keySimilarities.map(s => `<li>${escapeHTML(s)}</li>`).join('') || '<li>None</li>'}</ul>
+                                    <div><strong>Differences:</strong></div>
+                                    <ul>${item.keyDifferences.map(s => `<li>${escapeHTML(s)}</li>`).join('') || '<li>None</li>'}</ul>
+                                `}
+                            </div>
+                        </div>
+                    `;
+                }
+                bulkResults.innerHTML = html;
+
+                // Attach toggle events
+                document.querySelectorAll('.btn-toggle-details').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        const targetId = this.getAttribute('data-target');
+                        const detailDiv = document.getElementById(targetId);
+                        if (detailDiv) {
+                            detailDiv.classList.toggle('visible');
+                            this.textContent = detailDiv.classList.contains('visible') ? 'Hide details' :
+                            'Show details';
+                        }
+                    });
+                });
+            }
+
+            btnBulkCompare.addEventListener('click', bulkCompare);
+
+            // ========== INIT ==========
+            loadSavedKey();
+            updateCharCountA();
+            updateCharCountB();
+
+            apiKeyInput.addEventListener('input', () => {
+                const stored = localStorage.getItem('deepseek_api_key');
+                const current = apiKeyInput.value.trim();
+                if (current && current !== stored) {
+                    keyStatus.textContent = '⚠️ Unsaved key';
+                    keyStatus.className = 'key-status missing';
+                } else if (!current && !stored) {
+                    keyStatus.textContent = 'No key saved';
+                    keyStatus.className = 'key-status missing';
+                } else if (current === stored && stored) {
+                    keyStatus.textContent = '✅ Key saved';
+                    keyStatus.className = 'key-status saved';
+                }
+            });
+
+            console.log('🚀 Enhanced Solution Comparator ready.');
+            console.log('   • Generate, save, and compare solutions.');
+            console.log('   • Bulk compare against multiple .txt files.');
+        })();
+    </script>
+</body>
+</html>

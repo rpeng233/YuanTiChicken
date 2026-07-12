@@ -1,0 +1,13 @@
+Compute only the first four rows and first four columns.
+
+The key fact is that for every (i,j\ge 4),
+
+[
+a_{i,j}=a_{i+1,j+1}.
+]
+
+This follows by checking all (3^9) possible boundaries of a (5\times5) submatrix and observing that its ((4,4)) and ((5,5)) entries are always equal. Hence, from row and column (4) onward, every southeast diagonal is constant.
+
+Count all cells in the first four rows and first four columns directly. Every remaining cell lies on exactly one diagonal starting at either ((4,k)) or ((k,4)), and has the same value as that starting cell. Add the diagonal length to the corresponding value count.
+
+This gives (O(N)) time and (O(N)) memory.
