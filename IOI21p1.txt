@@ -1,0 +1,69 @@
+For each box, consider only the operations that affect it. Let their cumulative sums be
+
+[
+P_0=0,\qquad P_t=\sum_{j=1}^{t}v_j.
+]
+
+The box value is repeatedly clamped to ([0,c_i]). The key observation is that its final value depends on the latest suffix of prefix sums whose range reaches the capacity.
+
+Find the largest index (k) such that
+
+[
+\max_{t\ge k}P_t-\min_{t\ge k}P_t\ge c_i.
+]
+
+After time (k), the box has most recently hit either (0) or (c_i):
+
+* If (P_k) is the suffix maximum, it last hit (0), so
+
+  [
+  \text{ans}*i=P_q-\min*{t\ge k}P_t.
+  ]
+
+* If (P_k) is the suffix minimum, it last hit (c_i), so
+
+  [
+  \text{ans}*i=c_i+P_q-\max*{t\ge k}P_t.
+  ]
+
+If no such (k) exists, the capacity is never reached, and
+
+[
+\text{ans}*i=P_q-\min*{0\le t\le q}P_t.
+]
+
+## Processing All Boxes
+
+Sweep boxes from left to right. Operation (j) is active exactly for boxes in ([l_j,r_j]).
+
+Activating operation (j) adds (v_j) to every prefix sum (P_t) with (t\ge j), which is a suffix range addition. Deactivating it performs the opposite update.
+
+Maintain the prefix sums in a lazy segment tree supporting:
+
+* suffix range addition;
+* range minimum;
+* range maximum.
+
+For each box, binary-search the largest valid (k) using suffix minimum and maximum queries, then apply the corresponding formula.
+
+## Complexity
+
+The straightforward implementation runs in
+
+[
+O(q\log q+n\log^2 q)
+]
+
+time and
+
+[
+O(n+q)
+]
+
+memory.
+
+Searching directly inside the segment tree can improve the running time to
+
+[
+O((n+q)\log q).
+]

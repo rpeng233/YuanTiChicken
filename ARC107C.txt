@@ -1,0 +1,98 @@
+Key Idea
+
+Treat rows and columns independently.
+
+Swapping rows only changes the order of entries within each column, so it does not affect whether two columns satisfy the swap condition. Similarly, swapping columns does not affect whether two rows can be swapped. Therefore,
+
+\text{number of reachable row permutations}
+\times
+\text{number of reachable column permutations}.
+$$
+
+This independence is the main observation of the official editorial.
+
+Row Graph
+
+Construct an undirected graph whose vertices are the $N$ rows.
+
+Connect rows $x$ and $y$ when they can be swapped:
+
+$$
+a_{x,j}+a_{y,j}\le K
+\qquad\text{for every }j.
+$$
+
+The ability to swap two row vectors depends only on those vectors, not on their current positions.
+
+Inside one connected component, every permutation of the rows is reachable. Indeed, the transpositions corresponding to the edges of any connected graph generate all permutations of its vertices. Thus, if a connected component contains $s$ rows, it contributes
+
+$$
+s!
+$$
+
+possible row arrangements.
+
+Hence,
+
+$$
+R=\prod_{\text{row components }C}|C|!.
+$$
+
+Column Graph
+
+Similarly, construct a graph on the columns.
+
+Connect columns $x$ and $y$ when
+
+$$
+a_{i,x}+a_{i,y}\le K
+\qquad\text{for every }i.
+$$
+
+If the connected-component sizes are $t_1,t_2,\ldots$, then the number of reachable column permutations is
+
+$$
+C=\prod_j t_j!.
+$$
+
+Final Answer
+
+The required number of distinct matrices is
+
+$$
+\boxed{R\cdot C\bmod 998244353}.
+$$
+
+The matrix entries are all distinct, so different pairs of row and column permutations produce different resulting matrices. The problem statement gives $N\le 50$, making it feasible to test every pair of rows and columns directly.
+
+Algorithm
+Precompute $0!,1!,\ldots,N!$ modulo $998244353$.
+Initialize two DSU structures: one for rows and one for columns.
+For every pair of rows $(x,y)$:
+Check all columns $j$.
+If $a_{x,j}+a_{y,j}\le K$ for every $j$, merge $x$ and $y$.
+For every pair of columns $(x,y)$:
+Check all rows $i$.
+If $a_{i,x}+a_{i,y}\le K$ for every $i$, merge $x$ and $y$.
+Multiply the factorials of all row-component sizes and all column-component sizes.
+Correctness Summary
+Row operations do not change which column pairs are swappable, and column operations do not change which row pairs are swappable.
+Therefore, row and column permutations can be counted independently.
+Each connected component of the row graph can be permuted arbitrarily, contributing the factorial of its size.
+The same holds for each component of the column graph.
+Multiplying all these factorials gives exactly the number of reachable matrices.
+Complexity
+
+There are $O(N^2)$ pairs of rows and columns, and checking each pair takes $O(N)$ time.
+
+$$
+\boxed{O(N^3)\text{ time}}
+$$
+
+with
+
+$$
+\boxed{O(N^2)\text{ memory}}
+$$
+
+for storing the matrix, aside from the DSU structures.

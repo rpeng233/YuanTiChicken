@@ -1,13 +1,55 @@
-Compute only the first four rows and first four columns.
+Key Observation
 
-The key fact is that for every (i,j\ge 4),
+The matrix is defined by
 
 [
-a_{i,j}=a_{i+1,j+1}.
+a_{i,j}=\operatorname{mex}(a_{i-1,j},a_{i,j-1}).
 ]
 
-This follows by checking all (3^9) possible boundaries of a (5\times5) submatrix and observing that its ((4,4)) and ((5,5)) entries are always equal. Hence, from row and column (4) onward, every southeast diagonal is constant.
+Although there are (N^2) entries, the recurrence rapidly becomes periodic along diagonals.
 
-Count all cells in the first four rows and first four columns directly. Every remaining cell lies on exactly one diagonal starting at either ((4,k)) or ((k,4)), and has the same value as that starting cell. Add the diagonal length to the corresponding value count.
+By checking all possible boundary assignments of a (5\times5) matrix, one can prove
 
-This gives (O(N)) time and (O(N)) memory.
+[
+a_{4,4}=a_{5,5}.
+]
+
+The same argument can be applied to every shifted (5\times5) submatrix, giving
+
+[
+a_{i,j}=a_{i+1,j+1}
+\qquad (i,j\ge 4).
+]
+
+Thus, outside the first four rows and columns, every northwest–southeast diagonal is constant.
+
+Algorithm
+
+Explicitly compute:
+
+the first four rows;
+the first four columns.
+
+This requires only (O(N)) cells.
+
+Count all values in these rows and columns, taking care not to count their (4\times4) intersection twice.
+For every remaining diagonal:
+its value is the value at the point where it meets row (4) or column (4);
+multiply this value's count by the number of interior cells on that diagonal.
+
+More explicitly:
+
+The diagonal starting from ((4,j)), where (4\le j\le N), contributes (N-j) additional cells of value (a_{4,j}).
+The diagonal starting from ((i,4)), where (5\le i\le N), contributes (N-i) additional cells of value (a_{i,4}).
+
+Accumulate these contributions for values (0,1,2).
+
+Correctness
+
+The constant-size case analysis establishes (a_{4,4}=a_{5,5}) for every possible boundary of a (5\times5) matrix. Applying this result to a shifted submatrix proves that all cells sufficiently far from the top and left boundaries copy the previous cell on their diagonal.
+
+Therefore, computing the first four rows and columns determines every remaining diagonal, and weighting each boundary value by its diagonal length counts every matrix entry exactly once.
+
+Complexity
+Time: (O(N))
+Memory: (O(N)), or (O(1)) additional memory with careful streaming

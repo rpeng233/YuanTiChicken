@@ -1,0 +1,85 @@
+Key Idea
+
+We need to count quadruples ((a,b,c,d)) such that
+
+[
+1 \le a,b,c,d \le N
+]
+
+and
+
+[
+a+b-c-d=K.
+]
+
+Rewrite the equation as
+
+[
+a+b=(c+d)+K.
+]
+
+Thus, we only need to count how many ordered pairs have each possible sum.
+
+Number of Pairs with a Given Sum
+
+Let (f(s)) be the number of ordered pairs ((x,y)) satisfying
+
+[
+1 \le x,y \le N,\qquad x+y=s.
+]
+
+Then
+
+[
+f(s)=
+\begin{cases}
+s-1, & 2\le s\le N+1,\
+2N+1-s, & N+1 < s\le 2N,\
+0, & \text{otherwise}.
+\end{cases}
+]
+
+Equivalently,
+
+[
+f(s)=\min(s-1,,2N+1-s)
+]
+
+when (2\le s\le 2N).
+
+Counting the Quadruples
+
+Suppose
+
+[
+a+b=s.
+]
+
+Then the required value of (c+d) is
+
+[
+s-K.
+]
+
+There are (f(s)) choices for ((a,b)) and (f(s-K)) choices for ((c,d)). Therefore,
+
+\sum_{s=2}^{2N} f(s),f(s-K).
+]
+
+Ignore terms where (s-K\notin[2,2N]).
+
+Complexity
+
+There are only (2N-1) possible sums, so the algorithm runs in
+
+[
+O(N)
+]
+
+time and uses
+
+[
+O(1)
+]
+
+extra space.

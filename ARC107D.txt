@@ -1,0 +1,123 @@
+Key idea
+
+Let
+
+[
+dp[n][k]
+]
+
+be the number of multisets consisting of exactly (n) elements from
+
+[
+1,\frac12,\frac14,\frac18,\ldots
+]
+
+whose sum is (k).
+
+We divide the valid multisets into two cases based on whether they contain (1).
+
+Transition
+Case 1: The multiset contains (1)
+
+Remove one occurrence of (1). The remaining multiset:
+
+has (n-1) elements;
+has sum (k-1).
+
+Thus, this case contributes
+
+[
+dp[n-1][k-1].
+]
+
+Case 2: The multiset does not contain (1)
+
+Every element is then one of
+
+[
+\frac12,\frac14,\frac18,\ldots
+]
+
+Multiply every element by (2). The resulting multiset:
+
+still has (n) elements;
+consists of values (1,\frac12,\frac14,\ldots);
+has sum (2k).
+
+Thus, this case contributes
+
+[
+dp[n][2k].
+]
+
+Therefore,
+
+[
+\boxed{dp[n][k]=dp[n-1][k-1]+dp[n][2k]}.
+]
+
+This is exactly the recurrence given by the official editorial.
+
+Base cases and evaluation order
+
+Set
+
+[
+dp[0][0]=1.
+]
+
+All other initially undefined states are zero. In particular,
+
+[
+dp[n][k]=0\qquad\text{when }k>n,
+]
+
+because every element is at most (1), so (n) elements cannot have sum greater than (n).
+
+For each (n=1,2,\ldots,N), compute (k) in decreasing order:
+
+[
+k=n,n-1,\ldots,1.
+]
+
+This order is necessary because (dp[n][k]) depends on (dp[n][2k]), which is in the same row but has a larger second index. If (2k>n), that term is simply zero.
+
+All values are taken modulo (998244353), as required by the problem. The constraints are (1\le K\le N\le 3000).
+
+Pseudocode
+dp[0][0] = 1
+
+for n = 1 to N:
+    for k = n down to 1:
+        dp[n][k] = dp[n - 1][k - 1]
+        if 2 * k <= n:
+            dp[n][k] += dp[n][2 * k]
+        dp[n][k] %= MOD
+
+answer = dp[N][K]
+Correctness
+
+Every valid multiset belongs to exactly one of the following disjoint classes:
+
+it contains at least one (1);
+it contains no (1).
+
+Removing one (1) gives a bijection between the first class and the objects counted by (dp[n-1][k-1]).
+
+Multiplying all elements by (2) gives a bijection between the second class and the objects counted by (dp[n][2k]).
+
+Hence the recurrence counts every valid multiset exactly once.
+
+Complexity
+
+There are (O(N^2)) states, and each transition takes (O(1)) time.
+
+[
+\boxed{\text{Time: }O(N^2)}
+]
+
+[
+\boxed{\text{Memory: }O(N^2)}
+]
+
+The memory can be reduced to (O(N)) by storing only the previous and current rows.

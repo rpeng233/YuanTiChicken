@@ -1,0 +1,126 @@
+Key Idea
+
+For a connected component $C$ remaining after the deletions,
+
+\max_{s_C\in{-1,+1}}
+s_C\sum_{i\in C} B_i.
+$$
+
+Therefore, assign every remaining component a sign $+1$ or $-1$. Equivalently, assign every vertex one of three states:
+
++: the vertex remains and belongs to a positive component;
+deleted: the vertex is removed;
+-: the vertex remains and belongs to a negative component.
+
+Two adjacent vertices cannot have states + and -, since retained adjacent vertices must lie in the same component and hence have the same sign. This is the transformation used by the official editorial.
+
+Converting Profit into Cost
+
+Let
+
+$$
+BASE=\sum_{i=1}^{N}|B_i|.
+$$
+
+For each vertex, measure the loss relative to receiving its maximum possible contribution $|B_i|$.
+
+If $B_i\geq 0$:
+
+State	Contribution to profit	Loss
++	$B_i$	$0$
+deleted	$-A_i$	$B_i+A_i$
+-	$-B_i$	$2B_i$
+
+If $B_i<0$:
+
+State	Contribution to profit	Loss
++	$B_i=-	B_i	$	$2	B_i	$
+deleted	$-A_i$	$	B_i	+A_i$
+-	$-B_i=	B_i	$	$0$
+
+Denote these three losses by
+
+$$
+c_i(+),\qquad c_i(D),\qquad c_i(-).
+$$
+
+The answer is then
+
+$$
+BASE-\min(\text{total loss}),
+$$
+
+subject to the condition that no original edge has one endpoint labeled + and the other labeled -.
+
+Minimum-Cut Construction
+
+Create a source $S$, a sink $T$, and two vertices $X_i,Y_i$ for every original vertex $i$.
+
+Interpret their positions in an $S$-$T$ cut as follows:
+
+$X_i$ side	$Y_i$ side	State
+$S$	$S$	+
+$S$	$T$	deleted
+$T$	$T$	-
+
+Add the edge
+
+$$
+Y_i\rightarrow X_i
+$$
+
+with infinite capacity. This forbids the fourth configuration $(X_i,Y_i)=(T,S)$.
+
+To charge the three state costs, add:
+
+$Y_i\rightarrow T$ with capacity $c_i(+)$;
+$X_i\rightarrow Y_i$ with capacity $c_i(D)$;
+$S\rightarrow X_i$ with capacity $c_i(-)$.
+
+Exactly one of these finite edges crosses the cut, depending on the chosen state.
+
+For every original undirected edge ${u,v}$, add
+
+$$
+Y_u\rightarrow X_v,\qquad Y_v\rightarrow X_u
+$$
+
+with infinite capacity.
+
+If $u$ is + and $v$ is -, then $Y_u$ lies on the source side while $X_v$ lies on the sink side, so an infinite-capacity edge is cut. The reverse edge similarly forbids $u$ being - and $v$ being +.
+
+Thus, every finite cut corresponds exactly to a valid assignment, and its capacity equals the total loss.
+
+Final Answer
+
+Compute the maximum flow, which equals the minimum cut:
+
+\sum_{i=1}^{N}|B_i|
+
+\operatorname{maxflow}(S,T)
+}.
+$$
+
+Choose INF larger than the sum of all finite capacities, for example $2^{60}$ when using 64-bit integers.
+
+Correctness Summary
+The absolute value of each component sum can be represented by choosing a sign for that component.
+This gives the three vertex states +, deleted, and -, with + and - forbidden across an edge.
+The two-node gadget represents exactly these three states.
+Its finite cut capacity equals the loss contributed by the selected state.
+Infinite edges enforce all validity constraints.
+Hence the minimum cut gives the minimum loss, and subtracting it from $\sum |B_i|$ gives the maximum profit.
+Complexity
+
+The flow graph has:
+
+$2N+2=O(N)$ vertices;
+$O(N+M)$ edges.
+
+Using Dinic's algorithm, the complexity is
+
+$$
+O\left(N^2(N+M)\right),
+$$
+
+which is sufficient for $N,M\leq 300$.

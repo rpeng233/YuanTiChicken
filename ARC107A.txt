@@ -1,0 +1,33 @@
+We need to compute
+
+$$
+\sum_{a=1}^{A}\sum_{b=1}^{B}\sum_{c=1}^{C} abc
+\pmod{998244353}.
+$$
+
+Since the variables are independent, the sum factors as
+
+$$
+\left(\sum_{a=1}^{A}a\right)
+\left(\sum_{b=1}^{B}b\right)
+\left(\sum_{c=1}^{C}c\right).
+$$
+
+Using
+
+$$
+1+2+\cdots+n=\frac{n(n+1)}{2},
+$$
+
+the answer is
+
+$$
+\frac{A(A+1)}{2}
+\cdot
+\frac{B(B+1)}{2}
+\cdot
+\frac{C(C+1)}{2}
+\pmod{998244353}.
+$$
+
+Compute each triangular number modulo (998244353), then multiply the three results modulo (998244353).

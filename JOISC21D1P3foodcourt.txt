@@ -1,70 +1,59 @@
-Sweep shops from left to right and maintain a segment tree over event time.
+# JOISC 2021 Food Court — Solution Summary
 
-For each range update [L,R], activate it when the sweep reaches L and deactivate it after R. Thus, at shop x, the segment tree contains exactly the events affecting that shop, in chronological order.
+Process shops from left to right. For each range event on shops $[L,R]$, activate it at $L$ and deactivate it at $R+1$. While processing shop $a$, maintain a segment tree over event times containing exactly the events that affect shop $a$.
 
-For queue length, represent each event as a function
+## Queue length
 
-f(s)=max(s+a,b).
-Add K customers: (a,b)=(K,−∞)
-Remove K customers: (a,b)=(−K,0)
+Represent each operation as a function
 
-These functions compose associatively:
+$$
+f(z)=\max(z+x,y).
+$$
 
-(a
-1
-	​
+* Adding $K$ customers corresponds to $(x,y)=(K,-\infty)$.
+* Removing $K$ customers corresponds to $(x,y)=(-K,0)$.
 
-,b
-1
-	​
+These functions are closed under composition:
 
-)∘(a
-2
-	​
+$$
+(x_1,y_1)\circ(x_2,y_2)
+=======================
 
-,b
-2
-	​
+\left(x_1+x_2,\max(y_1+x_2,y_2)\right),
+$$
 
-)=(a
-1
-	​
+with the order chosen to match chronological processing.
 
-+a
-2
-	​
+Store the composition of active events in each segment-tree node. For a query at time $t$, applying the composition of events in $[1,t]$ to $0$ gives the current queue length $S$.
 
-,max(b
-1
-	​
+## Finding the requested customer
 
-+a
-2
-	​
+Also store, for every active insertion event, the number of inserted customers. Let
 
-,b
-2
-	​
+$$
+T=\text{total number of customers ever inserted before time }t.
+$$
 
-)).
+If the query asks for the $B$-th customer and $S<B$, output $0$.
 
-A prefix query up to a type-3 event gives the current queue size.
+Otherwise, $T-S$ customers have already left from the front, so the desired customer is the
 
-Also store, in each segment-tree node, the total number of customers added. Suppose by query time:
+$$
+P=T-S+B
+$$
 
-T customers have been added in total,
-S customers remain.
+-th customer among all customers ever inserted.
 
-Then T−S customers have left, all from the front. Therefore, the B-th remaining customer is the
+Use the insertion-count segment tree to find the first event-time prefix whose total inserted count is at least $P$. The insertion event at that position contains the desired customer, so output its group identifier.
 
-T−S+B
+## Complexity
 
--th customer in global insertion order.
+Each event is activated and deactivated once, and every segment-tree operation costs $O(\log Q)$.
 
-Use the segment tree’s add-count sums to find the join event containing that insertion rank, and output its group. If S<B, output 0.
+$$
+\boxed{O((N+Q)\log Q)\text{ time}}
+$$
 
-Complexity:
-
-O((N+Q)logQ)
-
-time and O(N+Q) memory.
+$$
+\boxed{O(N+Q)\text{ memory}}
+$$
