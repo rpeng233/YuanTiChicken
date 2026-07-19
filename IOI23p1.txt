@@ -1,0 +1,19 @@
+Compute the two distance arrays from the two special vertices. For each vertex define:
+
+- `a = min(dx, dy)`: cost to count it once.
+- `b = abs(dx - dy)`: extra cost to count it twice.
+- total cost to count it twice is `a + b = max(dx, dy)`.
+
+First handle the case where no vertex is counted twice: sort all `a` values and take the longest prefix whose sum is at most `K`.
+
+For any solution with a twice-counted vertex, every vertex on the path between the two special vertices must already be counted once. So pay all their `a` costs first. If this exceeds `K`, this case is impossible. Otherwise, reduce the remaining task to selecting as many upgrades as possible:
+
+- For path vertices, the second upgrade is independently available with cost `b`.
+- For off-path vertices with `a <= b`, treat the two upgrades as two independent costs `a` and `b`; taking the cheaper first ensures the dependency is respected.
+- For off-path vertices with `a > b`, in an optimum all but at most one of them are either not taken or fully taken, because two half-taken such vertices can be replaced by one fully taken cheaper vertex.
+
+Sort the independent costs and prefix-sum them. Sort the `a > b` vertices by full cost `a + b`, prefix-sum those full costs, and enumerate the prefix of fully taken vertices, also considering the possible single half-taken exception. For each enumeration, use binary search on the independent-cost prefix sums to fill the remaining budget and update the answer.
+
+The key correctness idea is that the relaxed “upgrade selection” optimum can always be realized: once the middle path is present, chosen once-counted vertices can be made connected by exchanging any detached vertex with its parent, and twice-counted upgrades expand from the middle outward; branch vertices with equal extra cost can be ordered shallowest first.
+
+Overall complexity is `O(N log N)`.

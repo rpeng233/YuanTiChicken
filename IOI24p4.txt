@@ -1,0 +1,11 @@
+Coordinate-compress values and ignore values appearing in only one input. For every value `x`, the answer must contain exactly `min(cntA[x], cntB[x])` copies of `x`.
+
+Classify `x` as **A-weak** if `cntA[x] <= cntB[x]`, otherwise **B-weak**. Then the order of all A-weak symbols is forced by filtering `A`, and the order of all B-weak symbols is forced by filtering `B`. So build a candidate `C` by merging these two forced sequences.
+
+During the merge, suppose the next forced symbols are `x` from the A-weak sequence and `y` from the B-weak sequence. Test which order is forced by checking, using occurrence-position lists, whether the required subsequence with the next `x` before all remaining `y` copies is common, or whether the symmetric subsequence with the next `y` before all remaining `x` copies is common. If exactly one order is possible, append that symbol and continue; otherwise no valid sequence exists. Finally check that the resulting `C` is a common subsequence of both inputs.
+
+It remains to verify that `C` contains every common subsequence. Compute greedy left and right embedding positions of every prefix/suffix of `C` in both inputs. Also compute, for each input sequence `S`, arrays describing how far in `S` one can realize any subsequence whose earliest/latest embedding in `C` ends at each position. These arrays are obtained with segment trees/Fenwick trees over positions of equal values.
+
+A counterexample subsequence, if it exists, can be chosen with only one switch between A-weak and B-weak symbols. Therefore it is enough to search for indices `i < j` in `C` where opposite weak types can be joined: one side is realizable too far left in one input and the other too far right in the other input. These inequalities are checked with a segment tree/Fenwick scan. If any such pair exists, return `[-1]`; otherwise return `C`.
+
+Total complexity: `O((n + m) log(n + m))` after compression.

@@ -1,0 +1,42 @@
+Use \(S_u\) as the subtree sum. The main structural fact is that an optimum can always be chosen with every leaf fixed to \(L\) and every non-leaf coefficient non-positive. Thus the problem becomes choosing where to apply unit decrements to internal nodes.
+
+For fixed \(L,R\), a bottom-up greedy works: after initializing leaves to \(L\) and internal nodes to \(0\), process nodes from leaves upward; whenever a subtree sum exceeds \(R\), decrement the cheapest still-valid node inside that subtree. An exchange argument shows this greedy is optimal.
+
+To handle many queries, use a weight-only decomposition. In a subtree/component with \(k\) leaves and minimum internal weight \(m\):
+
+- if \(kL \le R\), no internal decrement is needed;
+- otherwise exactly \(kL-R\) internal decrements are needed, so pay \((kL-R)m\), subtract \(m\) from all internal weights in the component, and split at every internal node that now has weight \(0\).
+
+A zero-weight internal node can be cut because its coefficient can be adjusted for free, making the parts independent.
+
+The recursive choices depend only on the weights, not on \(L,R\). Run this recursion once generically. Each chosen component records a term
+
+\[
+d(kL-R)
+\]
+
+where \(k\) is its leaf count and \(d\) is the effective minimum weight, but this term is active only when \(kL>R\). Also add the fixed leaf contribution
+
+\[
+L \sum_{\text{leaves } u} W_u.
+\]
+
+For a query, let
+
+\[
+t=\min(N,\lfloor R/L\rfloor).
+\]
+
+Only recorded terms with \(k>t\) contribute. Precompute suffix sums over \(k\):
+
+\[
+A_t=\sum_{k>t} dk,\qquad B_t=\sum_{k>t} d.
+\]
+
+Then the answer is
+
+\[
+L\left(\sum_{\text{leaves } u} W_u + A_t\right)-R B_t.
+\]
+
+Implement the generic recursion using an Euler-tour flattening and a segment tree to maintain alive nodes, subtree leaf counts, and the minimum effective internal weight. Each node is deleted/processed once, so preprocessing is \(O(N\log N)\); after building the suffix arrays, each query is answered in \(O(1)\).

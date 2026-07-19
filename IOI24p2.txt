@@ -1,0 +1,32 @@
+Encode the variable-length bit string as a fixed 1025-bit string:
+
+`0^(1024-S) + 1 + M`
+
+so the receiver later finds the first `1` and returns everything after it.
+
+Let the 16 safe indices be `a0, a1, ..., a15` in cyclic order modulo 31. For each safe index `ai`, define
+
+`di = (a(i+1) - ai) mod 31`.
+
+Each `di` is between 1 and 16, and the sum of all `di` is 31.
+
+Use 66 packets. In column `ai`, first write a unary code of length `di`:
+
+`di = 1 -> 1`  
+`di = 2 -> 01`  
+`di = 3 -> 001`  
+and so on.
+
+After this prefix in that column, use all remaining safe cells to store the 1025 encoded message bits in a fixed order. The unary prefixes occupy exactly 31 safe cells total, leaving
+
+`66 * 16 - 31 = 1025`
+
+safe cells, exactly enough.
+
+To decode, for every column `j`, look at the first `1` among the first 16 packets; call its position `d`. Add a directed edge
+
+`j -> (j + d) mod 31`.
+
+For safe columns, this edge points to the next safe column, so the 16 safe columns form a directed cycle of length 16. Any other cycle can only use the 15 unsafe columns, so the length-16 cycle is unique. Thus the receiver recovers all safe columns and their prefix lengths.
+
+Finally, skip the unary prefix in each recovered safe column, read the remaining safe cells in the same fixed order, obtain the 1025-bit encoded string, find its first `1`, and output the bits after it.

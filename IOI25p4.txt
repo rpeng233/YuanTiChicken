@@ -1,0 +1,33 @@
+Model each non-unit operation as an affine map \(x \mapsto t(x-p)\). For any fixed chosen set, an exchange argument shows the optimal order is increasing
+
+\[
+\frac{pt}{t-1},
+\]
+
+with unit operations treated as having infinite key, so they go last.
+
+Sort all non-unit operations by this key. Scan from the start and greedily take every operation that does not decrease the current value; taking it can only help, since it adds one answer element and leaves at least as many resources for everything later. After the first operation that would decrease the value, all remaining non-unit operations are “lossy”.
+
+Only \(O(\log V)\) lossy non-unit operations can be used, because after each such operation the deficit from its break-even point at least doubles, while prices and values are bounded. Thus keep a small constant limit such as 64 or 100.
+
+Run DP over the remaining sorted non-unit operations:
+
+\[
+dp[i][j] = \text{maximum value after considering the first } i \text{ operations and taking } j.
+\]
+
+Transitions are skip, or take if the resulting value is nonnegative:
+
+\[
+dp[i+1][j+1] = \max(dp[i+1][j+1],\ t_i(dp[i][j]-p_i)).
+\]
+
+Store parents to reconstruct the chosen subsequence.
+
+Unit operations are handled separately: sort them by cost and build prefix sums. For every DP state, binary search how many cheapest unit operations can still be afforded, and choose the state maximizing
+
+\[
+\text{greedy count} + j + \text{affordable unit count}.
+\]
+
+Reconstruct the answer as: all greedy non-unit operations, then the DP-chosen lossy non-unit subsequence in sorted order, then the cheapest affordable unit operations. The complexity is \(O(N \log N + NM)\), where \(M\) is the small logarithmic bound.

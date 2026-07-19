@@ -1,0 +1,9 @@
+Maintain the current tree diameter endpoints online. When a new vertex is attached, use depths and binary lifting to compute its distance to the two current endpoints; the diameter either stays the same or the new vertex replaces one endpoint.
+
+Encode only the final diameter, not the whole tree. Use fixed blocks. After each block, keep two candidate sets for the two diameter endpoints. Partition each candidate set into buckets, then encode the bucket pair containing the real endpoints. A code `h` is transmitted by placing one value in the following reserved interval: `h = 0` means send nothing, otherwise send value `(h-1)%4+1` at offset `(h-1)/4`. Thus positions carry most of the information and message values stay at most `4`.
+
+Use refinement blocks such as bucket counts `33, 9, 5, 3, 3`, with cut points chosen so that each next reserved interval has capacity `4·length+1` at least as large as the number of possible bucket pairs. The decoder performs the same deterministic bucket partitions and shrinks its candidate sets according to the received code. After several refinements, each endpoint has only a constant number of possible candidates left.
+
+Handle the last few vertices separately with a small hardcoded lookup scheme. Given the remaining candidates plus the final vertices, each of the last three calls sends a value `0..4` selecting a smaller guaranteed-valid candidate family; after the final value, only one pair remains possible, which the decoder returns.
+
+Correctness follows from the leaf-insertion diameter property and from the invariant that the real diameter endpoint pair is always contained in the decoder’s candidate sets; each bucket message preserves this invariant while shrinking the sets, and the final lookup table resolves the remaining constant ambiguity.

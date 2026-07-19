@@ -1,0 +1,24 @@
+A feasible shape can be characterized row-by-row: every used row contributes one contiguous interval, and these intervals are nested. Thus it can be built as a chain of maximal empty rectangles where the vertical span grows while the horizontal interval only shrinks.
+
+Use 1-indexing. For every cell `(i,j)`, compute `pos[i][j]`, the last blocked row in column `j` at or above `i`. If `(i,j)` is free, the vertical empty gap ending there has height `h = i - pos[i][j]`. Process all free cells in increasing `h`.
+
+For each state `(i,j)`, maintain `L[i][j]` and `R[i][j]`, the nearest blocking columns to the left and right of column `j` that bound the whole empty rectangle from rows `pos[i][j]+1 ... i`. Initialize them from the nearest blockers in row `i`; if the gap continues from row `i-1`, intersect with the previous row’s interval:
+`L = max(L, L[i-1][j])`, `R = min(R, R[i-1][j])`.
+
+Let `W = R - L - 1`. Define `dp[i][j]` as the best size of a valid nested shape whose current maximal rectangle is represented by this state. The recurrence is:
+
+```text
+dp[i][j] = dp[i-1][j] + W
+
+if L > 0:
+    dp[i][j] = max(dp[i][j],
+                   dp[i][L] + (pos[i][L] - pos[i][j]) * W)
+
+if R <= N:
+    dp[i][j] = max(dp[i][j],
+                   dp[i][R] + (pos[i][R] - pos[i][j]) * W)
+```
+
+The first transition extends the same vertical gap by one row. The other two transitions switch from the neighboring limiting gap on the left or right, adding the rectangle strip between the two blocker levels. Processing by increasing gap height guarantees all referenced states are already computed.
+
+The answer is the maximum `dp[i][j]` over all free cells. There are `O(N^2)` states, each processed in `O(1)`, so the total complexity is `O(N^2)` time and memory.

@@ -1,0 +1,21 @@
+Maintain the discovered prices and how many times each index has already been obtained. If the exact price of index `i` is known, calling `transaction(P[i])` obtains only index `i`, so after learning all prices we can fill the remaining counts directly.
+
+Use a recursive procedure on an unknown interval `[l, r]`. It is given a previous query whose first obtained index is `l`. From its return value, compute the total spent amount, and subtract already-known prices outside the current interval. This gives an equation:
+
+\[
+\sum_{i \in S} P[i] = C
+\]
+
+where `S` is the set of still-unknown indices obtained by that query, and `l ∈ S`.
+
+If `S` has only one element, then `P[l] = C`. After that, query `P[l] - 1` to start learning the next index.
+
+Otherwise, query
+
+\[
+\left\lfloor \frac{C}{|S|} \right\rfloor .
+\]
+
+This value is strictly less than `P[l]`, so index `l` is not obtained again, but it is at least the smallest price among indices in `S`, so some later index is obtained. Let the first obtained index be `s > l`; recursively solve the suffix starting at `s`. Once that suffix is known, subtract its prices from the equation and repeat. Eventually only `P[l]` remains, so it is determined.
+
+Every discovery query starts with some index `j`, and an index `i` can only be obtained in queries whose first index is at most `i`; thus index `i` is obtained at most `i` times before the final filling step. After all prices are known, repeatedly call `transaction(P[i])` until the count of each index `i` equals `i`. The total number of calls is bounded by the total required number of obtained items, at most `1 + 2 + ... + 99 = 4950`, so it fits the limit.

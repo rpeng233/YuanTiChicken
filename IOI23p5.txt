@@ -1,0 +1,45 @@
+Discard all fixed vehicles with `W <= X`: they can never slow down the queried vehicle, and faster vehicles do not affect slower ones. For the remaining vehicles, `W > X`, so their movements are independent of every query.
+
+Sweep stations from left to right. Maintain the current arrival time `a[i]` of each remaining vehicle. For a segment of length `d`, sort vehicles by `(a[i], W[i])`, with smaller `W` first on ties. Then compute
+
+```text
+e[i] = a[i] + W[i] * d
+new_a[i] = max prefix of e in that order
+```
+
+This gives all fixed arrival times at the next station.
+
+Now maintain the query answer as a monotone function
+
+```text
+F(Y) = arrival time at the current station
+```
+
+Initially `F(Y) = Y`. The function is identity plus a global offset, except on disjoint intervals of `Y` where it is constant.
+
+For each segment, first the queried vehicle would freely add `X * d`. Some intervals must instead be clamped to fixed arrival times. For each distinct fixed arrival time `t` at the next station, let `w` be the largest `W` among vehicles arriving at `t`. If the queried vehicle arrives at the previous station in
+
+```text
+(t - w*d, t - X*d]
+```
+
+then it catches that group and arrives at time `t`. Convert this interval of previous-station arrival times back to an interval of original `Y` values using the inverse of the current monotone function:
+
+```text
+L = last Y with F(Y) <= t - w*d
+R = last Y with F(Y) <= t - X*d
+```
+
+Then set `F(Y) = t` for all `Y in (L, R]`.
+
+Represent `F` with a balanced map of disjoint constant intervals. Range assignment deletes or trims overlapping intervals; each interval is inserted and removed only amortized once. Keep a lazy offset for the uniform `+ X*d` shifts.
+
+After processing all stations, answer each query by evaluating `F(Y)` with a map lookup, or convert the final intervals to a vector and binary search.
+
+Complexity:
+
+```text
+O(NM log(NM) + Q log(NM))
+```
+
+with `O(NM)` memory.

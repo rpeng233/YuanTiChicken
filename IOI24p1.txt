@@ -1,0 +1,57 @@
+Sort the items by increasing \(W\). Let
+
+\[
+C_i=A_i-B_i,\qquad \text{base}=\sum_i B_i.
+\]
+
+Then only unpaired items matter: the answer is
+
+\[
+\text{base}+\sum_{\text{unpaired }i} C_i.
+\]
+
+After sorting by \(W\), any optimal pairing can be transformed so that pairs do not cross or contain each other. Also, no optimal pair needs to span more than two positions: if a pair \((l,r)\) has \(r-l\ge 3\), it is better to replace it using nearer pairs. Therefore, it is enough to consider only pairs \((i,i+1)\) and \((i,i+2)\).
+
+Process all queries offline in increasing threshold. Create events:
+
+- \((i,i+1)\) becomes available at \(W_{i+1}-W_i\);
+- \((i,i+2)\) becomes available at \(W_{i+2}-W_i\).
+
+Maintain connected components of consecutive indices using DSU. Adjacent available pairs merge components. Each component is always an interval.
+
+For a component:
+
+- if its size is even, all items inside can be paired, so its extra cost is \(0\);
+- if its size is odd, exactly one item must remain unpaired. Using only adjacent pairs, the valid unpaired indices are those with the same parity as the component’s left endpoint;
+- when pair \((i,i+2)\) becomes available, index \(i+1\) also becomes a valid unpaired candidate.
+
+For each DSU component maintain:
+
+- size and left endpoint parity;
+- minimum \(C_i\) among even indices;
+- minimum \(C_i\) among odd indices;
+- minimum \(C_i\) among indices enabled by some \((i-1,i+1)\) pair.
+
+The component contribution is:
+
+\[
+0
+\]
+
+if its size is even, otherwise
+
+\[
+\min(\text{minimum }C_i\text{ with correct parity},\ \text{minimum enabled }C_i).
+\]
+
+Maintain the total extra cost by subtracting old component contributions before updates and adding new ones afterward. For each query, add all events whose required difference is at most the query value, then output
+
+\[
+\text{base}+\text{current extra cost}.
+\]
+
+The complexity is
+
+\[
+O((N+Q)\log(N+Q)).
+\]

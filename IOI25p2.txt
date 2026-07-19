@@ -1,0 +1,25 @@
+Use the change of variables
+
+\[
+X_i=i-H_i,\qquad Y_i=i+H_i.
+\]
+
+For one of the six possible assignments, the required conditions become
+
+\[
+X_i=X_j,\qquad Y_j=Y_k,\qquad Y_i=X_k.
+\]
+
+So for each \(i\), we need the number of equal \(y\)-coordinates shared by the two vertical lines \(x=X_i\) and \(x=Y_i\). Group all points \((X_i,Y_i)\) by their \(X\)-coordinate. Each query is an intersection-size query between two groups.
+
+Process all such queries offline in \(O(N\sqrt N)\): assign each query to the larger of its two groups. For one fixed group, temporarily mark the \(Y\)-values of all queried opposite groups, scan the fixed group to add matches, then unmark. A light/heavy argument gives \(O(N\sqrt N)\) total time.
+
+The other five assignments are easy: in each, once one endpoint or the middle point is fixed, the remaining indices are determined by the corresponding heights. Enumerate these \(O(N)\) candidates and verify each by sorting the three heights and three distances. Avoid double-counting the symmetric equal-distance case already included in the hard case.
+
+For the constructive part, use the same \((X,Y)\) representation and deliberately create many triples of the hard type. Choose \(N=M\). Build a small set \(S\) of even coordinates. Start with \(S=\{0\}\); repeatedly add the even value \(t\) that creates the largest number of new sums \(t+s\) with \(s\in S\). For each newly covered sum, add the point \((\min(s,t),\max(s,t))\). Stop once every required even sum is covered, and also add \((-1,1)\). Convert every point back by
+
+\[
+i=\frac{X+Y}{2},\qquad H_i=\frac{Y-X}{2}.
+\]
+
+Because \(|S|\) is about \(\sqrt N\), many vertical-line intersections are large, giving about \(N\sqrt N\) valid triples. For the smallest construction case, start from this output and greedily try changing individual heights, keeping a change only if it increases the counted number of triples.

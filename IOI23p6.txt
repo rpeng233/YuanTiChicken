@@ -1,0 +1,7 @@
+Use color 0 as blank, color 1 as final path, and colors 2–5 as arrows for the four directions.
+
+First build a BFS tree using only local arrow rotations. Maintain a directed tree whose arrows eventually lead to a special active edge/cell. When standing on an arrow, rotate it cyclically until it points either to an unvisited blank cell or to a neighboring arrow pointing back, then move there. When standing on a blank cell reached from an arrow, replace it by the opposite arrow, thereby adding one new vertex to the tree. This Euler-tour-like traversal expands vertices in BFS order, so the tree path to the target is shortest.
+
+When the target is first reached, switch to cleanup mode by breaking the “two arrows point to each other” invariant. Now interpret arrows as a rooted tree toward the target. Repeatedly walk to children if any neighboring arrow points to the current cell; otherwise delete the leaf by following its arrow upward. A deleted cell becomes color 1 if it is the start or touches an already confirmed path cell; otherwise it becomes 0.
+
+Because the tree is a BFS tree, this reverse deletion marks exactly the shortest tree path from start to target: off-path branches disappear before they can falsely become adjacent to the growing final path. Generate all valid local transition rules by looping over all possible 5-cell state arrays and applying this deterministic transition function.

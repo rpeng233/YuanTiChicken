@@ -1,0 +1,11 @@
+Compress the grid into horizontal intervals of free cells. Only rows whose temperature is a new prefix maximum can create new horizontal connectivity; all other rows matter only through minimum-temperature checks for vertical movement.
+
+Sweep these record rows in increasing order. For each such row, form maximal column intervals where `H[j] < T[i]`. Maintain the currently active intervals. When a new larger interval appears, old intervals inside it become its children if a vertical connection is possible, i.e. if:
+
+`min(T[old_row..new_row]) > min(H[old_l..old_r])`.
+
+Annotate that parent edge with the leftmost and rightmost columns in the old interval where such a vertical transition can be made.
+
+This builds a forest of interval-nodes. Each top-row column belongs to one initial node. Two columns are globally connected iff their nodes have a common ancestor.
+
+For bounded-column queries, binary-lift on this forest. For every jump, store the combined edge constraints: the maximum required left boundary and minimum required right boundary. For a query, find the LCA of the two endpoint nodes; if none exists, return false. Otherwise, check whether all required transition columns on both paths can still fit inside `[L,R]`. This gives `O(log M)` per query after `O((N+M) log(N+M))` preprocessing.

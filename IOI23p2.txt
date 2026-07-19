@@ -1,0 +1,24 @@
+Use the weakest density condition only. In any induced subset, there are at most two connected components; if there are two, both are cliques. Thus maintaining two paths is enough.
+
+Maintain two disjoint paths `P` and `Q` covering all processed vertices. Start with `[0]` and `[1]`. Add vertices in pairs `x, y`, looking only at the current tails `a = P.back()` and `b = Q.back()`:
+
+- If `a-x` exists, append `x` to `P`.
+  - If `x-y` exists, append `y` to `P`.
+  - Else if `b-y` exists, append `y` to `Q`.
+  - Else `x-b` is forced, so concatenate reversed `Q` onto `P`, and set `Q = [y]`.
+
+- Else if `b-x` exists, append `x` to `Q`.
+  - If `x-y` exists, append `y` to `Q`.
+  - Else `a-y` is forced, so append `y` to `P`.
+
+- Else `a-b` is forced.
+  - If `x-y` exists, concatenate reversed `Q` onto `P`, and set `Q = [x, y]`.
+  - Else `a-y` and `b-y` are forced, so append `y`, then reversed `Q`, to `P`, and set `Q = [x]`.
+
+An odd remaining vertex is appended to one of the two paths if possible; otherwise the two old paths are merged using the forced edge between their tails, and the leftover vertex becomes the second path.
+
+At the end, if there is no edge between `P` and `Q`, return the longer path. Otherwise, try joining them directly through endpoint edges. If that fails, both `P` and `Q` can be treated as cycles because the missing endpoint edges force the closing edges inside each path. Use binary search with set queries to find one cross edge `P[i] - Q[j]`, then break both cycles at that edge and output:
+
+`P[i+1 ... end], P[0 ... i], Q[j ... end], Q[0 ... j-1]`.
+
+Each pair insertion uses at most three queries, and the final merging uses only a few endpoint checks plus two binary searches, staying within the required query limit.

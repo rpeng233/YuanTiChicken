@@ -1,0 +1,7 @@
+Run a DFS and use its tree as the backbone. For a tree, take the Euler tour sequence of vertices, and fill the grid by anti-diagonals according to this sequence. Then only consecutive tour vertices touch, so exactly the tree edges appear.
+
+For the remaining edges, use the key DFS property: every non-tree edge connects a vertex to one of its ancestors. Process each such edge at the descendant endpoint. At the last occurrence of a vertex in the Euler tour, replace its single anti-diagonal by a three-diagonal “sandwich”: the two outer diagonals are filled with that vertex, and the middle diagonal contains the ancestor vertices to which it must be connected. These inserted ancestor cells are placed so that they are not side-adjacent to each other; each touches only the surrounding cells of the descendant vertex, creating exactly the needed extra edges.
+
+The diagonal where a vertex is processed is far enough from both ends of the grid to fit all its ancestor contacts, because its position is at least its DFS depth from both sides. Thus all back edges can be inserted independently without introducing unwanted adjacencies.
+
+The original DFS Euler tour uses `2N - 1` diagonals. Replacing each vertex’s final occurrence by three diagonals adds `2N` more, for at most `4N - 1` diagonals, which fits in a square of size `2N`. Since `N ≤ 40`, this also satisfies the absolute grid-size limit and achieves the best scoring bound.

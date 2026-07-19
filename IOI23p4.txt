@@ -1,0 +1,9 @@
+Compute subtree sizes first. For every node store its children as sorted pairs `(edge_color, child_subtree_size)`. If a node has two children with the same color, every subtree containing it is immediately invalid.
+
+Use the following characterization. For two nodes `a, b` in a candidate subtree with `size[a] <= size[b]`, node `b` must dominate node `a`: for every child color of `a`, `b` must also have that color, and the corresponding child subtree size of `b` must be at least as large. If `size[a] == size[b]`, their whole child-pair lists must be identical. A subtree is valid iff all its child subtrees are valid and this dominance condition holds for all node pairs inside it. Since dominance is transitive, after sorting nodes by subtree size it is enough to check only adjacent nodes.
+
+Process nodes bottom-up. For each currently valid subtree keep an ordered set of pairs `(subtree_size, node)`. Initially each set contains only its root. When merging a child subtree into its parent, use small-to-large merging. Before inserting a node `x` into the larger set, find its predecessor and successor by subtree size and check the dominance condition only with those neighbors. The dominance check is done by iterating through the smaller node’s sorted child-color list and binary-searching the same color in the larger node’s list.
+
+If any child subtree is invalid, any duplicate child color exists, or any neighbor check fails during merging, mark the current root invalid. Otherwise, after all merges, the root is valid.
+
+Each node is moved only logarithmically many times by small-to-large merging, and each check uses ordered-set operations plus binary searches in child lists, giving about `O(N log N (log N + log M))` time and `O(N)` memory.

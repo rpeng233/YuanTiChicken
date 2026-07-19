@@ -1,88 +1,18 @@
-## Main Observation
+Define layers by `min(row, col)`. The key observation is:
 
-For every cell with (i,j>0), its color depends only on the cells directly above and to the left:
+- Layer `0` is known.
+- Layer `1` has no adjacent `1`s.
+- Layer `2` has no adjacent `1`s and no three adjacent `0`s.
+- Every later layer is just a diagonal copy inward:  
+  `A[i][j] = A[i-1][j-1]`.
 
-[
-A[i][j]=1
-\quad\Longleftrightarrow\quad
-A[i-1][j]=A[i][j-1]=0.
-]
+Thus any cell with `min(i,j) >= 2` can be projected diagonally back to layer `2`, so the interior is determined by one flattened sequence.
 
-After examining the first few rows and columns, one can prove that for all (i,j\ge 3),
+Compute layers `1` and `2` in `O(N)`. Store layer `2` as a sequence indexed by diagonal, and build prefix sums of:
 
-[
-A[i][j]=A[i-1][j-1].
-]
+- values,
+- index × value.
 
-Therefore, the interior of the mosaic is constant along diagonals: every cell depends only on (j-i).
+For each query, count the contribution from layers `0` and `1` separately using simple prefix sums. The remaining part projects onto a contiguous interval of layer `2`. Each projected element contributes according to how many cells of the rectangle lie on its diagonal; these multiplicities form an increasing arithmetic part, then a constant part, then a decreasing arithmetic part. Using the two prefix sums, each part is evaluated in `O(1)`.
 
-## Diagonal Representation
-
-Construct an array (Z) containing the colors of the diagonals:
-
-[
-A[i][j]=Z[j-i]
-\qquad\text{for }i,j\ge 2.
-]
-
-The array (Z) can be generated in (O(N)) time by explicitly constructing only the first few rows and columns.
-
-Precompute:
-
-[
-P_0[x]=\sum_{d\le x} Z[d],
-\qquad
-P_1[x]=\sum_{d\le x} dZ[d].
-]
-
-These prefix sums allow queries of both
-
-[
-\sum Z[d]
-\quad\text{and}\quad
-\sum dZ[d]
-]
-
-over any interval of diagonals in (O(1)) time.
-
-## Rectangle Queries
-
-Handle cells in the first two rows and columns separately using ordinary one-dimensional prefix sums.
-
-For the remaining interior rectangle, consider a diagonal (d=j-i). Let (c(d)) be the number of cells of that diagonal contained in the query rectangle. Then the contribution of diagonal (d) is
-
-[
-c(d)Z[d].
-]
-
-As (d) varies, (c(d)) has a trapezoidal shape:
-
-1. it increases linearly;
-2. it may remain constant;
-3. it decreases linearly.
-
-Thus, the relevant diagonal interval can be split into a constant number of ranges where
-
-[
-c(d)=ad+b.
-]
-
-For such a range ([x,y]),
-
-[
-\sum_{d=x}^{y} c(d)Z[d]
-=======================
-
-a\sum_{d=x}^{y} dZ[d]
-+
-b\sum_{d=x}^{y} Z[d].
-]
-
-Both sums are obtained from (P_0) and (P_1) in constant time.
-
-## Complexity
-
-* Preprocessing: (O(N))
-* Each query: (O(1))
-* Total time: (O(N+Q))
-* Memory: (O(N))
+Total complexity: `O(N + Q)` time and `O(N)` memory.
