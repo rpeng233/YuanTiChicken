@@ -1,0 +1,85 @@
+First simulate the deterministic choices. Maintain the current values in a multiset; at step \(i\), take the largest value \(\le a_i\), or the minimum value if none exists. Record it as \(k_i\), erase it, then insert the new value gained after this step.
+
+For every step, the fixed integer \(x\) must satisfy two conditions:
+
+\[
+k_i x \ge a_i
+\]
+
+and
+
+\[
+k_i x \equiv a_i \pmod {p_i}.
+\]
+
+The inequalities only give a global lower bound:
+
+\[
+L=\max_i \left\lceil \frac{a_i}{k_i} \right\rceil.
+\]
+
+Now solve the congruences. For each
+
+\[
+k_i x \equiv a_i \pmod {p_i},
+\]
+
+let
+
+\[
+g=\gcd(k_i,p_i).
+\]
+
+If \(a_i\not\equiv 0\pmod g\), there is no solution. Otherwise divide by \(g\):
+
+\[
+\frac{k_i}{g}x \equiv \frac{a_i}{g}\pmod{\frac{p_i}{g}}.
+\]
+
+Since \(\frac{k_i}{g}\) and \(\frac{p_i}{g}\) are coprime, use extended Euclid to get its inverse and convert it into
+
+\[
+x \equiv r_i \pmod {q_i}.
+\]
+
+Combine all such congruences with extended CRT. Maintain
+
+\[
+x \equiv ans \pmod M.
+\]
+
+To merge with
+
+\[
+x \equiv r \pmod q,
+\]
+
+solve
+
+\[
+ans+Mt \equiv r \pmod q.
+\]
+
+Let \(d=\gcd(M,q)\). If \(r-ans\) is not divisible by \(d\), there is no solution. Otherwise reduce and solve for \(t\) modulo \(q/d\), then update
+
+\[
+ans \leftarrow ans+Mt,
+\qquad
+M \leftarrow \operatorname{lcm}(M,q).
+\]
+
+Normalize \(ans\) into \([0,M)\).
+
+After all congruences are merged, choose the smallest number congruent to \(ans\) modulo \(M\) and at least \(L\):
+
+\[
+ans += \left\lceil \frac{L-ans}{M} \right\rceil M
+\]
+
+if \(ans<L\).
+
+Use 128-bit integers for intermediate multiplication. The total complexity is
+
+\[
+O((n+m)\log m+n\log V).
+\]

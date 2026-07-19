@@ -1,0 +1,15 @@
+Use parity. If a set \(S\) is modified, then after subtracting the self-toggle and the effects of already reported edges, `query(v)` changes iff the number of still-unreported edges from \(v\) to \(S\) is odd. Therefore, whenever this parity is \(1\), an edge from \(v\) into \(S\) can be found by binary search; doing this for many vertices simultaneously gives an overall divide-and-conquer.
+
+For small cases, modify vertex \(i\), query all \(j>i\), and report \((i,j)\) exactly when \(j\)'s saved state changes.
+
+For structured cases, use deterministic variants:
+
+- If every vertex has exactly one neighbor, process bits: modify all vertices whose \(k\)-th bit is \(1\), query all vertices, and recover each vertex’s neighbor bit by bit.
+- If every vertex has exactly one smaller neighbor, use parallel binary search on the parent index: toggle \([l,mid]\), and decide whether each vertex’s parent lies left or right.
+- For acyclic graphs, first compute the xor of all neighbors of every vertex by the bit method. Then repeatedly test whether \(x\) is adjacent to `xor[x]`; if so, report the edge and delete its contribution from the xor values, like leaf stripping.
+
+For the general case, repeat randomized rounds. Keep only unfinished vertices, shuffle them, and run divide-and-conquer on the permutation. At each recursion, toggle the left half, use corrected query values to send candidates to the half where the odd parity lies, and also start searches for right-half vertices that have odd parity into the left half. At a leaf, the parity guarantee means every candidate is adjacent to that leaf vertex, so report those edges.
+
+Maintain a known-adjacency list containing all reported edges. Whenever a temporary toggle is performed, also update a simulated state through known edges, so `query(v) xor simulated[v]` always measures only unreported-edge parity. After each round, use `check` to discard finished vertices.
+
+Correctness follows from the odd-parity invariant: the recursion only descends into a set containing an odd number of remaining edges, so at singleton size the edge must exist and be unreported. A random order makes each non-isolated vertex have odd earlier degree with probability at least \(1/3\), so each round finds a constant expected amount of progress. The total expected number of operations is \(O(M\log N)\).

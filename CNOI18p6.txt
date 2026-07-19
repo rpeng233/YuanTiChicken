@@ -1,0 +1,18 @@
+Compress forced chains first: a non-root vertex with only one child must use both adjacent tree edges in any valid cycle, so such chains can be contracted. If the remaining graph is tiny, use ordinary subset DP to count Hamiltonian cycles.
+
+For the main DP, process the rooted tree bottom-up. The leaves of any subtree form a contiguous interval in DFS order. Since leaf-leaf edges only reach distance at most \(K\le 3\), after finishing a subtree only its first \(K\) and last \(K\) leaves can still interact with the outside.
+
+For each subtree, store a plug-DP connectivity state over these boundary leaves, plus the degree/status of the subtree root. A boundary leaf is marked as:
+
+- closed, no longer relevant;
+- isolated, degree \(0\);
+- an endpoint of the component containing the subtree root;
+- an endpoint of some other path component, represented by a color/pairing.
+
+States are canonicalized by renumbering colors.
+
+When merging two adjacent child blocks, concatenate their states and enumerate all possible leaf-leaf edges crossing the boundary between them. Update components as in standard connectivity DP: extend paths, merge two paths, or use two edges through an isolated leaf; reject degree overflow and premature invalid cycles. Then discard middle leaves that are no longer within distance \(K\) of the outside, keeping only the new boundary leaves.
+
+After all children of a non-root vertex are merged, process the parent edge: root degree \(0\) is impossible, degree \(1\) forces using the parent edge, and degree \(2\) forbids it while turning the root component into an ordinary path. At the global root, enumerate the remaining wrap-around leaf edges between the two boundary ends and accept only fully closed states forming one cycle.
+
+Because \(K\le 3\), the number of legal states and transitions is constant, so after precomputing transitions the DP is linear in \(n\).

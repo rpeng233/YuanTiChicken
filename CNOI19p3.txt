@@ -1,0 +1,39 @@
+Keep a state for each index:
+
+- `0`: chosen nowhere
+- `1`: chosen only on the first side
+- `2`: chosen only on the second side
+- `3`: chosen on both sides
+
+First ignore the common-index restriction: choose the largest `k` values from each side independently. This gives the maximum possible sum before enforcing the restriction. Let `cnt` be the number of indices with state `3`.
+
+If `cnt < l`, repeatedly increase `cnt` by one using the best possible exchange. There are only four exchange types:
+
+1. Add first-side value at a `2` index, remove first-side value at a `1` index:  
+   `max a[2] - min a[1]`
+
+2. Add second-side value at a `1` index, remove second-side value at a `2` index:  
+   `max b[1] - min b[2]`
+
+3. Turn one `1` index and one `2` index into `3`, and remove one existing `3`:  
+   `max a[2] + max b[1] - min(a+b)[3]`
+
+4. Turn one `0` index into `3`, and remove one `1` plus one `2`:  
+   `max(a+b)[0] - min a[1] - min b[2]`
+
+Each step takes the valid exchange with maximum delta, applies it, updates the answer and the affected states, and increments `cnt`.
+
+Maintain these quantities with six priority queues:
+
+- maximum `a` among state `2`
+- maximum `b` among state `1`
+- minimum `a` among state `1`
+- minimum `b` among state `2`
+- minimum `a+b` among state `3`
+- maximum `a+b` among state `0`
+
+Use lazy deletion: before reading a heap top, discard it if its stored index no longer has the required state.
+
+Correctness follows from the max-cost-flow interpretation: the initial independent choice is the unconstrained optimum, and the four exchanges are exactly all possible residual augmenting operations that increase the number of common indices by one. Choosing the best delta each time simulates successive optimal augmentations.
+
+The complexity is `O(n log n)` per test case, using `long long` for the answer.

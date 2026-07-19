@@ -1,0 +1,21 @@
+For the case \(m \ge n-1\), a solution always exists. Maintain remaining materials in an ordered set.
+
+If the smallest remaining amount is at least \(k\), make one dish using \(k\) from that material. Otherwise let \(x\) be the smallest amount and \(y\) the largest. One can prove \(x+y \ge k\), so make one dish using all \(x\) of the smallest material and \(k-x\) of the largest, then update the largest. This reduces the instance size and preserves validity. This greedy is \(O(m\log n)\).
+
+The only hard case is \(m=n-2\). A solution exists iff the materials can be split into two groups, each of which forms an \(m=|S|-1\) subproblem. Thus we need a subset \(S\) such that
+
+\[
+\sum_{i\in S} d_i = (|S|-1)k.
+\]
+
+Rewrite this as
+
+\[
+\sum_{i\in S}(d_i-k)=-k.
+\]
+
+So run subset-sum DP on values \(d_i-k\), using a bitset over the range \([-nk,nk]\). If no subset with sum \(-k\) exists, output \(-1\). Otherwise restore the subset, split the materials into the subset and its complement, and run the greedy \(m=n-1\) constructor on both parts.
+
+The necessity follows by viewing materials as vertices and dishes as edges: with \(n\) vertices and \(n-2\) edges, the graph is disconnected, so any valid construction splits into two independent \(m=n-1\) components.
+
+Overall complexity is \(O(n^2k / w + m\log n)\) with bitset optimization, where \(w\) is the machine word size.

@@ -1,0 +1,9 @@
+Pack every 256-bit generated value into compact words, preferably four `uint64_t`, and also view it as 16 consecutive blocks of 16 bits.
+
+Build 16 bucket tables. For each stored value and each block position `p`, insert its index into `bucket[p][block_value]`. Thus a query can quickly find all stored values sharing a chosen 16-bit block.
+
+For each query, decode the hexadecimal string, apply the required XOR with the previous answer, and pack it similarly. Then enumerate all 16 block positions. For position `p`, only check candidates in `bucket[p][query_block[p]]`. For each candidate, compute the Hamming distance by XORing the four 64-bit words and summing popcounts. If the distance is at most `k`, answer `1`; otherwise, after all buckets are exhausted, answer `0`.
+
+Correctness comes from the pigeonhole principle: since `k ≤ 15`, two valid 256-bit strings can differ in at most 15 bit positions. After splitting into 16 blocks, at least one whole 16-bit block must remain identical, so any valid candidate will appear in at least one enumerated bucket. The popcount check then verifies it exactly.
+
+Preprocessing uses `O(16n)` memory and time. Because the generated values are random, each bucket has expected size about `n / 2^16`, so each query checks only a small expected number of candidates. Use static arrays/linked lists, fast input, and built-in popcount or a precomputed table for constant-factor speed.

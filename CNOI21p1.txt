@@ -1,0 +1,26 @@
+Root the tree arbitrarily. Replace the edge state with vertex colors:
+
+- Initially every vertex has color `0`.
+- For each update, assign all vertices on the updated path a new unique color.
+- An edge is heavy exactly when its two endpoints have the same color.
+
+This works because a fresh color makes all edges inside the updated path heavy, while every edge leaving the path has one endpoint with the fresh color and the other without it, so it becomes light. All other edges remain unchanged.
+
+Use heavy-light decomposition and a segment tree over the DFS order of vertices. Each segment tree node stores:
+
+- left endpoint color,
+- right endpoint color,
+- number of adjacent equal-color pairs inside the interval,
+- lazy assignment tag.
+
+When merging two intervals:
+
+```text
+cnt = left.cnt + right.cnt + (left.right_color == right.left_color)
+```
+
+Path update is a standard HLD path range assignment with a fresh color.
+
+For a path query, decompose the path into HLD intervals and concatenate them in the actual path order. Each queried interval returns the same three values; if the interval direction is reversed, swap its left and right colors. Merge the pieces with the rule above. The final `cnt` is the number of heavy edges on the path.
+
+Time complexity: `O(log^2 n)` per operation, memory complexity: `O(n)`.

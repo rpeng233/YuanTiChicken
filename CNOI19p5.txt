@@ -1,0 +1,55 @@
+Observe that one operation with parameter \(A\) is a uniformly random interleaving of two ordered parts. Thus, for any position \(x\), the previous position contributing to it follows a hypergeometric distribution.
+
+Maintain the expectation function as a polynomial in \(x\). Since the initial value is either linear or quadratic, and the above transition preserves degree, it is enough to keep coefficients in the basis
+
+\[
+1,\quad y=x-1,\quad \binom{y}{2}.
+\]
+
+Initial coefficients are:
+
+\[
+x:\ (1,1,0),\qquad x^2:\ (1,3,2).
+\]
+
+For each operation, suppose the current polynomial is
+
+\[
+c_0+c_1y+c_2\binom{y}{2}.
+\]
+
+Let \(D=\binom nA\), and treat invalid binomial coefficients as \(0\). Compute
+
+\[
+p_1=
+\frac{
+A\binom{n-1}{A}
++
+\left(\binom{n-2}{A-2}+\binom{n-2}{A}\right)y
+}{D},
+\]
+
+\[
+p_2=
+\frac{
+\frac{A(A-1)}2\binom{n-1}{A}
++
+A\binom{n-2}{A}y
++
+\left(\binom{n-3}{A-3}+\binom{n-3}{A}\right)\binom{y}{2}
+}{D}.
+\]
+
+Then replace the polynomial by
+
+\[
+c_0+c_1p_1+c_2p_2.
+\]
+
+Precompute factorials and inverse factorials to answer every binomial coefficient in \(O(1)\). After processing all operations, answer a query position \(x\) by evaluating
+
+\[
+c_0+c_1(x-1)+c_2\binom{x-1}{2}.
+\]
+
+Overall complexity is \(O(n+m+q)\), with \(O(n)\) preprocessing memory.

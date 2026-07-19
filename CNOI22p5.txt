@@ -1,0 +1,12 @@
+Convert the required swap count to the inversion count.
+
+Compress all appearing values; an optimal sequence only needs these values. Each constraint becomes: every covered position has value at least `V`, and at least one covered position has value exactly `V`. Compute `low[i] = max V` over constraints covering `i`.
+
+Now choose the positions forced to be exactly some value. For each value `x`, consider only positions with `low[i] = x`. Process its intervals in decreasing left endpoint. If the interval already contains a chosen exact-`x` position, skip it; otherwise choose the leftmost still-available position in the interval and fix it to `x`. If none exists, the constraints are impossible. This greedy is optimal because smaller values should be placed as far left as possible.
+
+Then fill all remaining positions. Maintain a segment tree over compressed values; for each possible value `x`, store the current inversion cost if the current position is set to `x`. Initialize it from all fixed positions. Scan left to right:
+
+- if the position is fixed to `y`, update the cost ranges to move this fixed value from “future” to “past”;
+- otherwise choose the smallest `x >= low[i]` with minimum cost, assign it, and update the costs as a newly placed past value.
+
+Finally count inversions of the constructed sequence with a Fenwick tree. Complexity is `O((n + m) log(n + m))` with linear memory.

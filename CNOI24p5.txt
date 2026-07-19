@@ -1,0 +1,22 @@
+Let `dep[1]=0` and convert every range to absolute depths:
+
+`L_u = dep[u] - r_u`, `R_u = dep[u] - l_u`, `B_u = dep[u] - h_u - 1`.
+
+After one upward jump, the new endpoint gives a bound no weaker than all previous ones, so the DP needs only the current vertex. Let `f[u]` be the number of valid continuations from `u`, with `f[1]=1`.
+
+For each vertex `u`, define an array `g_u[x]`: the number of ways such that, before the first upward jump, we move only downward inside `u`’s subtree, and that first upward jump lands on the ancestor of `u` at depth `x`. Then
+
+`g_u = ( sum g_v over children v of u + indicator[L_u, R_u] )`,  
+with all positions `x > B_u` cleared to `0`.
+
+Then
+
+`f[u] = sum_x g_u[x] * f[ancestor of u at depth x]`.
+
+Maintain every `g_u` with a lazy segment tree over depths. The recurrence becomes: merge children’s segment trees, add `1` on `[L_u, R_u]`, and delete the suffix `(B_u, n]`. To evaluate `f[u]`, traverse its segment tree; for a covered interval `[l,r]` with coefficient `c`, add
+
+`c * (pathPrefix[r] - pathPrefix[l-1])`,
+
+where `pathPrefix[d]` is the sum of already computed `f` values on the current root-to-`u` path by depth.
+
+Because the segment-tree construction is bottom-up while `f` is evaluated top-down, either make the segment-tree operations persistent or record/replay merges in reverse. Each segment-tree node is created and visited only `O(1)` times, so the total complexity is `O(n log n)` per test case, modulo `998244353`.

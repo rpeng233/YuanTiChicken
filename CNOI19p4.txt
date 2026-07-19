@@ -1,0 +1,12 @@
+Run Dijkstra without expanding the huge implicit edge set.
+
+For each operation, store it in the adjacency list of its starting point. The priority queue stores pending operations with key `dist[start] + cost`, not individual target relaxations. When an operation is popped, all still-unsettled points in its target range can be assigned this distance, because Dijkstra guarantees this is the smallest possible remaining value.
+
+Maintain all unsettled points in a data structure supporting:
+
+- insert/delete a point;
+- enumerate all points inside an axis-aligned rectangle.
+
+A common implementation is a segment tree over `x`; each segment-tree node stores a `set` ordered by `(y, id)`. To query a rectangle, visit the `O(log n)` covered segment-tree nodes, use `lower_bound` in each set to find points with `y` in range, and delete every found point from all sets on its root-to-leaf path.
+
+Whenever a point is settled, set its distance and push all operations starting from it into the priority queue with their resulting distance. Each point is deleted once, and each operation is pushed once, so the total complexity is about `O(n log^2 n + m log m)` with `O(n log n + m)` memory.

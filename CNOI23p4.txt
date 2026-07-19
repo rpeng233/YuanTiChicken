@@ -1,0 +1,31 @@
+Model any strategy as an ordered full binary tree. For a leaf, let \(c\) be the number of times its path goes through the “moved-on-top” child. The total cost splits into
+
+\[
+\sum c_i w_i + S,
+\]
+
+where \(S\) depends only on the tree shape. For a fixed multiset of \(c_i\), the weight part is minimized by sorting \(c_i\) increasingly and weights decreasingly, then pairing them.
+
+So the main task is to enumerate all useful multisets \(C=\{c_i\}\) and the minimum corresponding shape cost \(S\).
+
+Construct trees top-down by splitting leaves. Initially \(C=[0]\), \(S=0\). Splitting a leaf with value \(x\) replaces it by two leaves \(x\) and \(x+1\). It is enough to split a prefix of the sorted \(C\), i.e. the \(k\) smallest values. If the current number of leaves is \(m\), then after splitting \(k\) leaves:
+
+\[
+C'=\operatorname{sort}(C \cup \{C_1+1,\dots,C_k+1\}),
+\]
+
+\[
+S' = 2S + (m+k-2).
+\]
+
+The formula comes from all existing non-root internal nodes increasing their height contribution by one level, plus the newly created internal nodes.
+
+Use DP/BFS over states \(C\). For each state store the minimum \(S\), and also the minimum previous split count. The split counts can be required to be nondecreasing, so from a state only try \(k\ge\text{last}\). This pruning leaves only a small number of states for \(n\le100\).
+
+Precompute all states up to \(100\). For each test case, sort weights decreasingly, and for every precomputed state of size \(n\), compute
+
+\[
+S+\sum_{i=1}^n C_i w_i
+\]
+
+with \(C\) sorted increasingly. The minimum over all states is the answer. Use 64-bit integers.

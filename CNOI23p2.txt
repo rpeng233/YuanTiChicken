@@ -1,0 +1,22 @@
+Use inclusion-exclusion over the set of roots required to be valid. For a chosen set \(S\), its contribution is
+\[
+(-1)^{|S|+1}2^{c(S)},
+\]
+where \(c(S)\) is the number of optional edges that are valid for every root in \(S\).
+
+Build the virtual tree of \(S\). A valid optional edge has only two possible forms: it is contained in a virtual-tree edge, or it lies in a side subtree branching off the virtual tree. Therefore, process the original tree bottom-up and compute signed DP values by the LCA/top node of the chosen set.
+
+Let \(f_u\) be the signed contribution when \(u\) is the current virtual-tree top. For every child subtree of \(u\), maintain two values:
+
+- \(X\): contribution if this child subtree contains selected points;
+- \(Y\): contribution if it contains none.
+
+Then combine children with a small knapsack over the number of selected child subtrees. If \(u\) itself is selected, apply the negative inclusion-exclusion sign; otherwise require at least two selected child subtrees. To support all \(X\) values efficiently, flatten the tree by DFS order and use a segment tree with range multiplication and range-sum queries. Optional edges whose contribution doubles some set of states become interval multiplications.
+
+This handles the case where cross edges do not affect the virtual-tree top. In the general case, the only missing correction occurs when exactly two child subtrees are selected and an edge crosses between their two paths through the top. For each top \(u\), treat the two chosen child subtrees as a 2D point. Each such crossing edge multiplies a rectangle of states by \(2\). Process these rectangle multiplications with a scanline plus another segment tree, then replace the previously counted “two-child” contribution by the corrected value.
+
+Precompute powers of \(2\), ancestor/LCA data, subtree intervals, and inside/outside edge counts. The total complexity is
+\[
+O((n+m)\log n)
+\]
+with linear memory up to logarithmic LCA tables.

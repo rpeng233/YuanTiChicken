@@ -1,0 +1,23 @@
+Tighten all intervals by repeatedly propagating every difference constraint: each endpoint is intersected with the neighbor’s interval expanded by the allowed difference. After this closure, endpoint-forced variables are known.
+
+For any non-forced variable, moving value \(1\) to \(2\) or value \(k\) to \(k-1\) never breaks feasibility and never worsens the objective, so only inner values matter. Thus:
+
+- for \(k=3\), every non-forced variable is set to \(2\);
+- for \(k=4\), after removing fixed variables, the pair contribution is constant and only a linear term remains, so all free variables are either \(2\) or \(3\); evaluate both;
+- for \(k=5\), only values \(2,3,4\) remain.
+
+For \(k=5\), contract variables that must be equal. The remaining binary constraints only forbid a pair of contracted components from taking \(2\) and \(4\) simultaneously. Since \(c_1,c_5\) are fixed and \(c_3\) is determined by \(c_2,c_4\), every feasible assignment can be represented by a point \((c_2,c_4)\). For one query, the variable part of the objective can be rewritten as
+
+\[
+c_2(v_2-v_3+2B c_1)+c_4(v_4-v_3+2B c_5)-2B c_2c_4
+=
+-2B(c_2-C_1)(c_4-C_2)+C_3,
+\]
+
+where \(B=10^6\). So each query only asks for the feasible point minimizing a translated product.
+
+The always-relevant candidates include the three feasible rectangle corners \((\min c_2,\min c_4)\), \((\max c_2,\min c_4)\), and \((\min c_2,\max c_4)\). If the translated feasible rectangle lies fully in the third quadrant, only points on the upper-right convex hull can be optimal; all interior points are dominated by a hull endpoint.
+
+Build this hull without enumerating all feasible points. Start from the two known extreme points. For a segment \(AB\), find the feasible point maximizing its cross product with \(AB\); this is a linear objective in \(c_2,c_4\). Solve it with a layered minimum-cut model: each component chooses one of \(2,3,4\), unary costs encode the linear coefficient, and infinite-capacity edges forbid illegal \(2/4\) pairs. If the returned point is strictly outside the segment, add it to the hull and recurse on the two subsegments.
+
+The number of integer hull points is \(O(n^{2/3})\), so only that many min-cuts are needed. After collecting all candidate \((c_2,c_4)\) points, answer every query by scanning them, substituting into the formula, and taking the maximum value.

@@ -1,0 +1,15 @@
+Compress SCCs first; give each component weight equal to its size. A component contributes iff it is reachable from `s` and can reach `t`.
+
+In the condensed DAG, the special reachability condition implies that all ancestors of any node form a chain. Thus after removing transitive edges, the DAG becomes a rooted outward tree; reachability is exactly “ancestor reaches descendant”. Build it by topological order: for every node, choose the deepest incoming predecessor as its parent. Preprocess DFS order, LCA, and root-to-node prefix sums of component weights.
+
+For each query, map all endpoints to SCC ids. Build a virtual tree on:
+
+- `s`, `t`,
+- all endpoints of the temporarily added edges,
+- their LCAs, optionally the root.
+
+Virtual-tree edges are directed downward and represent whole tree paths; store for each such edge the total weight of internal compressed-tree nodes on that path. Then add the temporary directed edges with weight `0`.
+
+Run DFS/BFS on this small directed graph from `s`, and another DFS/BFS on the reversed graph from `t`. A virtual node contributes its SCC weight if it is marked by both searches. A virtual-tree edge `u -> v` contributes its stored internal path weight if `u` is reachable from `s` and `v` can reach `t`.
+
+The sum of these contributions is the answer. If no `s -> t` route exists, the intersection is empty and the sum is `0`. The virtual graph has `O(k)` nodes and edges, so each query is `O(k log k)` for building the virtual tree, effectively constant for `k <= 2`; preprocessing is linear or near-linear.

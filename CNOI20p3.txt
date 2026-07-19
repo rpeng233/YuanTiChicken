@@ -1,0 +1,31 @@
+Use square-root decomposition on the index dimension.
+
+For each block, store its elements sorted by value, their ranks inside the block, and prefix counts inside the block. Also precompute:
+
+- counts of values `≤ v` in all complete blocks up to each block;
+- the answer for every value-rank interval inside one block;
+- cross-block contributions between complete blocks, so that contributions for value range `[1, x]` can be obtained quickly.
+
+For a query, split the index range into:
+
+1. left partial block,
+2. right partial block,
+3. complete middle blocks.
+
+Then add the contributions separately:
+
+- **partial–partial:** enumerate or merge the two small sorted lists;
+- **partial internal:** use the precomputed prefix counts inside that block;
+- **partial–complete / complete–partial:** enumerate the partial block elements and use complete-block prefix counts to count compatible elements;
+- **complete internal:** sum the precomputed intra-block tables;
+- **complete–complete:** use the cross-block precomputation, applying value-range inclusion–exclusion.
+
+The value restriction `[a,b]` is handled as:
+
+```text
+answer([a,b]) = answer([1,b]) - answer([1,a-1]) - overcount
+```
+
+where the overcount consists of pairs whose first value is `< a` and second value is in `[a,b]`; this is subtracted block by block using prefix counts.
+
+With block size about `sqrt(n)`, preprocessing and memory are about `O(n sqrt n)`, and each query is answered in `O(sqrt n)`, giving total time about `O((n+m) sqrt n)`.

@@ -1,0 +1,12 @@
+Maintain each live sequence with:
+
+- a dynamic value segment tree storing value frequencies;
+- a linked list storing the actual order, so the tail value is known.
+
+Append: add a node to the list and increment its value in the segment tree.  
+Delete: take the tail value, decrement it in the segment tree, then move the tail to its predecessor.  
+Merge: concatenate the two linked lists in \(O(1)\), and merge their segment trees recursively.
+
+For a query, suppose the selected roots are \(r_1,\dots,r_k\), total length is \(L\), and `need = L / 2 + 1`. Search on all \(k\) segment trees simultaneously: at each value interval, sum the counts in all left children. If this sum is at least `need`, go left; otherwise subtract it from `need` and go right. The final leaf is the only possible answer. Then compute its total frequency across the \(k\) roots; output it only if it is strictly more than \(L/2\), otherwise output \(-1\).
+
+Use 64-bit integers for total lengths and counts. The total complexity is \(O((\text{number of inserted elements} + C_m)\log V)\), with \(V = n+q\).

@@ -1,0 +1,21 @@
+Represent each label by its occurrence-position set inside the current window. A valid window is exactly when the multiset of these occurrence sets is identical on the two sides.
+
+Maintain this multiset with two-level hashing:
+
+- Give every position `i` a random/hash weight `w[i]`.
+- For each label `x`, maintain  
+  `ha[x] = sum w[i]` over current positions containing `x` on the first side, and similarly `hb[x]`.
+- Maintain global hashes  
+  `Sa = sum mix(ha[x])`, `Sb = sum mix(hb[x])`.
+- When inserting or deleting a position, only its 3 labels change: subtract the old `mix(h[x])`, update `h[x]`, then add the new value.
+
+Then the current window is valid iff `Sa == Sb`, with double hashing or 64-bit randomized hashing to avoid collisions.
+
+For a fixed left endpoint, validity is monotone in the right endpoint: once a window becomes invalid, extending it cannot make it valid again. Also, after increasing the left endpoint, the maximal valid right endpoint never decreases. Therefore use two pointers to precompute `lim[l]`, the largest valid right endpoint for each `l`:
+
+- Keep a valid window `[l, r]`.
+- Try adding `r + 1`; if it remains valid, keep it and advance `r`, otherwise undo and stop.
+- Set `lim[l] = r`.
+- Remove position `l` and continue.
+
+Each position is inserted/deleted only O(1) times, and each update touches 3 elements, so preprocessing is O(n). Each query `[l, r]` is answered by checking whether `r <= lim[l]`. Total complexity is O(n + q), with O(n + m) memory.

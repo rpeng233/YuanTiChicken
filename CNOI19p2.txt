@@ -1,0 +1,23 @@
+Use the rightmost maximum as the root of an interval. After fixing its position \(p\), the two sides become independent; \(p\) is usable only when it is near the middle:
+
+\[
+|(p-l)-(r-p)|\le 2 .
+\]
+
+Let \(f_{l,r}(x)\) be the number of valid fillings of interval \([l,r]\) whose maximum is at most \(x\). Take \(f_{\emptyset}(x)=1\). If the root value is exactly \(x\), the left side may have values \(\le x\), while the right side must have values \(<x\). Thus:
+
+\[
+f_{l,r}(x)=f_{l,r}(x-1)+
+\sum_p [x\text{ is allowed at }p]\,
+f_{l,p-1}(x)\,f_{p+1,r}(x-1),
+\]
+
+where the sum only includes the constant number of middle-near positions \(p\).
+
+Only intervals reachable from \([1,n]\) through such splits are needed. Generate them by DFS with memoization, then process them by increasing length.
+
+The value range is too large, so compress all endpoints \(A_i\) and \(B_i+1\). For each compressed value segment \([c_t,c_{t+1})\), the predicate “value is allowed at position \(p\)” is constant. Inside one segment, every \(f_{l,r}(x)\) is a polynomial in \(x\) of degree at most \(r-l+1\), because the transition only multiplies lower-degree polynomials and then takes a prefix sum.
+
+For each segment, compute the first \(\min(\text{length}, n+1)\) point values by the DP recurrence. If the segment is longer than \(n+1\), use Lagrange interpolation on these \(n+1\) values to jump directly to the segment end. The endpoint values become the initial \(f(x-1)\) values for the next segment.
+
+The final answer is \(f_{1,n}\) at the end of the last segment. Complexity is about \(O(Mn^2)\), where \(M\) is the number of reachable intervals, with \(O(Mn)\) memory.

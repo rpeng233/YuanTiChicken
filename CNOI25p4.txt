@@ -1,0 +1,20 @@
+For a string, a bit can change after one transformation only when the length-3 block ending there is `101` or `110`.
+
+`101` becomes harmless after one step.  
+`110`, however, shifts one position to the right each step: if the `0` of the leftmost `110` is at position `x`, it takes `n - x + 1` steps until it disappears. Therefore:
+
+- if some `110` exists, let its start be `p`; the answer is `n - p - 1`;
+- otherwise, if some `101` exists, the answer is `1`;
+- otherwise, the answer is `0`.
+
+Maintain this under range bit flips with a lazy segment tree. For each node store:
+
+- its first two and last two bits;
+- the earliest occurrence position of each of `110`, `001`, `101`, `010`.
+
+When merging two children, take the minimum occurrence already inside either child, and additionally check the at most two length-3 blocks crossing the boundary. For a flip tag, invert the stored boundary bits and swap:
+
+- `110` with `001`;
+- `101` with `010`.
+
+After building the tree, compute the current answer from the root, include it in the required XOR accumulator, then process each range flip in `O(log n)` and repeat. Total complexity is `O((n + q) log n)` per test group, with linear memory.

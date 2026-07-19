@@ -1,0 +1,22 @@
+Compute subtree sizes and keep only “caterpillar” binary trees: at every node, at least one child subtree has size at most \(1\). All other trees can be ignored, because they can never generate a caterpillar tree, while it is enough to decide whether all but finitely many caterpillar trees are generatable.
+
+Merge all kept trees into a 4-ary trie describing the spine of such a tree. For each non-leaf node, move to one of four classes:
+
+1. only left child;
+2. only right child;
+3. both children, right child is a leaf;
+4. both children, left child is a leaf.
+
+Then recurse into the nontrivial child. If a kept tree ends at some trie node, mark that node terminal: from there, any continuation is possible.
+
+Define `good(x)` recursively:
+
+- if `x` is terminal, return true;
+- otherwise all four children must exist and be `good`;
+- if any class is missing, return false.
+
+The answer is positive iff the root of this trie is `good`.
+
+The proof is by reducing every infinite missing family to an infinite missing family of caterpillar trees. For a trie state to cover all sufficiently deep caterpillar continuations, either some original tree already has a leaf there, allowing arbitrary replacement, or all four possible next local shapes must be coverable recursively.
+
+Total complexity is linear in the total number of input nodes.

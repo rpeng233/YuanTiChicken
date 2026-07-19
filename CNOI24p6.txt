@@ -1,0 +1,21 @@
+First find the SCC \(S\) from which all vertices are reachable. Only vertices in \(S\) can be type 1 or type 2; vertices outside it are type 3. If no such SCC exists, output all 3.
+
+Find one type-1 vertex by repeatedly shrinking any alive vertex \(v\) with current indegree \(1\) into its only predecessor \(u\): redirect all outgoing edges of \(v\) to start from \(u\), delete self-loops, and count parallel edges as separate. Maintain this with DSU plus small-to-large merging of in/out edge lists. If a type-1 vertex exists, this process leaves a valid candidate. Verify the candidate by one DFS: it must reach all vertices, and every non-tree edge in its DFS tree must go to an ancestor. If verification fails, there is no type-1 vertex; then every vertex in \(S\) is type 2 and the rest are type 3.
+
+Assume a type-1 root \(r\) is found. Build a DFS tree from \(r\) inside \(S\). All non-tree edges are back edges. For each vertex \(u\), consider back edges starting in the subtree of \(u\) and ending outside it. Such edges are exactly the possible “exit” edges of that subtree.
+
+Compute, for every \(u\), whether its subtree has 0, 1, or at least 2 exit edges, and if unique, record its endpoint \(y\). Then:
+\[
+u \text{ is type 1} \iff u=r \text{ or } (\text{subtree } u \text{ has exactly one exit edge ending at } y \text{ and } y \text{ is type 1}).
+\]
+Process vertices top-down, since \(y\) is always an ancestor.
+
+For every type-1 vertex, its unique exit edge is mandatory; all DFS tree edges are also mandatory. Use tree difference on these mandatory back edges to get \(cnt[u]\): the number of mandatory exit edges of subtree \(u\).
+
+Now determine type 2. Initially mark all type-1 vertices as “good”. Traverse the DFS tree from top to bottom. Whenever a good vertex \(y\) is reached, scan all back edges \(x\to y\). This edge can certify every vertex on the tree path from \(x\) upward to the child below \(y\), provided it would be the only kept exit edge:
+- if the edge is mandatory, require \(cnt[p]=1\);
+- otherwise require \(cnt[p]=0\).
+
+Use another DSU “jump to parent” structure to paint these paths only once in total. Newly painted non-type-1 vertices become type 2 and may later propagate in the same way.
+
+Finally, output 1 for type-1 vertices, 2 for painted non-type-1 vertices in \(S\), and 3 otherwise. The total complexity is \(O((n+m)\log n)\) with small-to-large merging, or linear after the DFS-tree phase.

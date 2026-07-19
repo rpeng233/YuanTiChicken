@@ -1,0 +1,40 @@
+The key observation is that operations split the sequence into independent contiguous blocks. Each block can be seen as being collapsed from both ends toward one remaining position, or becoming entirely zero. For a block \([l,r]\), the remaining value at a center \(p\) equals:
+
+\[
+\sum_{i\equiv p\pmod 2} a_i-\sum_{i\not\equiv p\pmod 2} a_i.
+\]
+
+Thus its sign depends only on the parity of \(p\), not on the exact position.
+
+Precompute, for every position, how far a value can be pushed left/right by repeatedly applying valid adjacent operations. Then a block \([l,r]\) is feasible iff the reachable ranges from its two ends intersect; possible centers lie in that intersection.
+
+Let
+
+\[
+D(l,r)=\sum_{\text{odd }i}a_i-\sum_{\text{even }i}a_i
+\]
+
+inside the block.
+
+- If \(D(l,r)=0\), the whole block may become zero.
+- If \(D(l,r)>0\), the remaining center must be odd.
+- If \(D(l,r)<0\), the remaining center must be even.
+
+Now do prefix DP. Let \(F_i\) be the maximum score for the first \(i\) positions, and \(G_i\) be the total product contribution for all distinct results on the first \(i\) positions.
+
+For every next block \([l,r]\):
+
+- If it becomes all zero, add all \(b\)-weights to \(F\), and multiply by all \(c\)-weights for \(G\).
+- Otherwise, exactly one center remains nonzero. For \(F\), subtract the minimum \(b_p\) among valid centers of the required parity. For \(G\), multiply by the product of all \(c\) in the block and by \(\sum c_p^{-1}\) over valid centers \(p\) of that parity.
+
+Precompute for every interval and parity:
+
+\[
+\min b_p,\qquad \sum c_p^{-1}.
+\]
+
+This makes each block transition \(O(1)\).
+
+To avoid double counting, use a canonical decomposition: while computing reachability, stop a one-sided collapse as soon as the carried value becomes zero. This prevents an all-zero block from being split or merged in multiple ways.
+
+Overall complexity is \(O(n^2)\) time and \(O(n^2)\) memory.

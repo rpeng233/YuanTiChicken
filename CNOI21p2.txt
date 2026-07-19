@@ -1,0 +1,25 @@
+Let \(n=n_1\), \(P=998244353\). For each adjacent pair of layers, build its adjacency matrix \(A_i\). Compute
+
+\[
+M=A_1A_2\cdots A_{k-1}\pmod P,
+\]
+
+so \(M_{ij}\) is the number of ways to go from start \(i\) to end \(j\).
+
+The answer is simply
+
+\[
+\det(M)\pmod P.
+\]
+
+Why this works: expand the determinant,
+
+\[
+\det(M)=\sum_{\pi}(-1)^{\operatorname{inv}(\pi)}\prod_i M_{i,\pi_i}.
+\]
+
+This enumerates all path families, weighted by the parity of the endpoint permutation. Any family with two paths sharing an internal vertex cancels with the family obtained by swapping the two suffixes after their first shared vertex; the endpoint permutation changes by one transposition, so the sign flips. Thus only vertex-disjoint families remain.
+
+For a remaining valid family, the parity of the number of crossings equals the parity of the endpoint permutation: each crossing swaps the relative order of exactly one pair of paths, and the final order is exactly the endpoint permutation. Therefore the determinant equals “even contribution minus odd contribution”.
+
+Implementation: multiply matrices modulo \(P\), then compute the determinant of the final \(n\times n\) matrix using Gaussian elimination modulo \(P\). Complexity is \(O(kn^3)\), or \(O(n\sum m_i+n^3)\) if multiplying by edges directly.

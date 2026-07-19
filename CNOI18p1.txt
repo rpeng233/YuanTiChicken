@@ -1,0 +1,21 @@
+First run Dijkstra from the fixed destination using the length/cost edge weight; store `dist[x]`.
+
+Then sort edges by the threshold weight in descending order and build a maximum Kruskal reconstruction tree. When two DSU components are merged by an edge of weight `w`, create a new internal node with value `w`, make the two component roots its children, and let the merged component’s root be this new node.
+
+For each node in this reconstruction tree, compute:
+
+```text
+best[u] = minimum dist[x] among all original vertices x in u’s subtree
+```
+
+For leaves, `best[u] = dist[u]`; for internal nodes, it is the minimum of its children.
+
+Preprocess binary lifting ancestors on the reconstruction tree. For a query `(v, p)`, climb from `v` upward while the ancestor’s stored value is greater than `p`. The reached node represents exactly the whole component reachable using only edges whose threshold weight is above `p`. The answer is then:
+
+```text
+best[reached_node]
+```
+
+If the queries are forced online, decode each query using the previous answer before performing this lookup.
+
+Complexity: Dijkstra and sorting dominate preprocessing, about `O((n + m) log n + m log m)`, with `O(log n)` per query.

@@ -1,0 +1,27 @@
+Use the LCA as the separator. For any ordered pair \((x,y)\), the useful path first goes upward from \(x\) to \(l=\mathrm{lca}(x,y)\), then uses a shortest path from \(l\) to \(y\). Thus the main task is to know, for every node \(u\), the shortest distances from \(u\) to all nodes in its subtree.
+
+Process nodes top-down. Maintain `f[dep[u]][v] = dist(u,v)` for \(v\) in \(u\)’s subtree. To compute distances from \(u\):
+
+- initialize `dist[u]=0`;
+- for every descendant \(v\), also allow the path that first goes from \(u\) to its parent, so initialize from the already-computed parent layer;
+- run Dijkstra restricted to \(u\)’s subtree, using all downward extra edges and upward tree edges inside the subtree.
+
+Since height is at most \(18\), every vertex participates in only \(O(n)\) Dijkstra runs, so the total complexity is acceptable, about \(O(2^n n^2)\) with a heap.
+
+For summing the answer, compute by DFS:
+
+\[
+g_u=\sum_{v\in subtree(u)} dist(v,u),
+\]
+
+which is just the sum of upward tree distances.
+
+Then for each target \(u\), enumerate its ancestors \(t\). Let \(c\) be the child of \(t\) on the path to \(u\). Nodes in \(subtree(t)\setminus subtree(c)\) reach \(u\) by first going up to \(t\), then taking the precomputed shortest path \(dist(t,u)\). Their contribution is
+
+\[
+\bigl(g_t-g_c-size_c\cdot w(c,t)\bigr)
++
+(size_t-size_c)\cdot dist(t,u).
+\]
+
+If \(dist(t,u)=\infty\), stop enumerating higher ancestors. Add all such contributions plus \(g_u\) over every \(u\), modulo \(998244353\).

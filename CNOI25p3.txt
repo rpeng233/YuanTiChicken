@@ -1,0 +1,22 @@
+Fix one valid traversal order and regard every other traversal as flipping some internal subtrees.  
+For a node \(v\), define its weight \(W(v)\) as the set of labels that appear exactly once inside \(v\)'s subtree.
+
+Key fact: for every distinct weight with size at least \(2\), the number of flipped internal nodes having that weight must be even; these are independent constraints. Empty weights and singleton weights impose no constraint. If after the first \(i\) insertions the number of distinct weights over all nodes is \(C_i\), then there is always one empty class and exactly \(i\) singleton classes, so the answer is
+
+\[
+2^{(2n-1)-(C_i-i-1)}=2^{2n+i-C_i}.
+\]
+
+Thus the task reduces to computing every \(C_i\).
+
+Represent each \(W(v)\) by an \(n\)-bit string \(s_v\), where bit \(j\) is \(1\) iff label \(j\) appears exactly once in \(v\)'s subtree. For each inserted pair, put bit \(j\) on the two corresponding leaves, then merge upward using XOR; this gives all strings \(s_v\).
+
+Now sort all node strings lexicographically. For the first \(i\) operations, \(C_i\) is the number of distinct length-\(i\) prefixes. In sorted order,
+
+\[
+C_i = 1 + \#\{k : \operatorname{lcp}(s_k,s_{k+1}) < i\}.
+\]
+
+So compute LCPs of adjacent sorted strings, bucket them by length, prefix-sum the buckets, and output \(2^{2n+i-C_i}\).
+
+Use sparse segment trees over bit positions to store strings. Merging is XOR-merge. Lexicographic comparison and LCP are found by descending the segment tree using interval hashes, giving an \(O(n\log^2 n)\) implementation; sorting segment-tree nodes bottom-up by child ranks reduces it to \(O(n\log n)\).

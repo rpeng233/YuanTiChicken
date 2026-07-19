@@ -1,0 +1,35 @@
+Compute a canonical hash for every rooted subtree, together with its size and number of children. The hash should be order-independent: sort child hashes, then combine them.
+
+Let `solve(x, y, lim)` be the minimum number of deletions needed to make the subtree rooted at `x` become the subtree rooted at `y`, with `x` matched to `y`, and abandon the search once the answer exceeds `lim`.
+
+Basic pruning:
+
+- If `size[x] < size[y]`, impossible.
+- If `deg[x] < deg[y]`, impossible.
+- If the hashes are equal, return `0`.
+- If `y` is a leaf, return `size[x] - 1`.
+
+Otherwise, compare the children of `x` and `y`.
+
+First greedily match all child subtrees with equal hashes; these parts require no work and can be ignored. Put the remaining children of `x` into `A`, and the remaining children of `y` into `B`.
+
+Now every child in `A` must cause at least one deletion, so if `|A| > lim`, return impossible. Also, if `|A| < |B|`, return impossible, since deletions cannot create new children.
+
+Because `k` is tiny, brute-force the remaining matching. Enumerate all permutations of `A`; match the first `|B|` elements with `B`, and delete the rest completely. For one permutation, the cost is
+
+```text
+sum solve(A[i], B[i], reduced_limit) for i < |B|
++ sum size[A[i]] for i >= |B|
+```
+
+Take the minimum over all permutations.
+
+When recursing into one unmatched child, reserve at least one deletion for every other unmatched child, so the recursive limit can be reduced to approximately
+
+```text
+lim - |A| + 1
+```
+
+This pruning is the key to keeping the brute force small.
+
+Finally, run `solve(root1, root2, k)`. If the returned value is at most `k`, output success; otherwise output failure. The preprocessing is near-linear after sorting child hashes, and the search is feasible because at every nontrivial recursive step there are at most `k` unmatched children, with `k ≤ 5`.

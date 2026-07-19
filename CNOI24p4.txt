@@ -1,0 +1,39 @@
+Use symmetry and assume \(n \le m\).
+
+All valid fractions below \(1\) have a unique finite continued-fraction form
+
+\[
+\frac1{2k_1+\frac1{2k_2+\cdots+\frac1{2k_t}}}
+\]
+
+where every \(k_i\) is a positive integer. Fractions above \(1\) are exactly their reciprocals. Thus it is enough to count these continued fractions and also count when their reciprocals fit the bounds.
+
+To avoid enumerating every continued fraction separately, choose the first occurrence of the maximum \(k_i=x\). Then all terms before it are \(<x\), all terms after it are \(\le x\). For a fixed surrounding sequence, the resulting fraction is a linear fractional expression
+
+\[
+\frac{ax+b}{cx+d}.
+\]
+
+DFS over the surrounding sequence, maintaining \((a,b,c,d)\) and the lower bound \(v\) of \(x\). For each state, all valid \(x\ge v\) form an interval, so add them in \(O(1)\):
+
+\[
+ax+b\le n,\quad cx+d\le m
+\]
+
+counts the fraction itself, and
+
+\[
+cx+d\le n
+\]
+
+counts its reciprocal, because \(n\le m\).
+
+When extending the DFS by adding a term \(u\), update the linear transform by
+
+\[
+(a,b,c,d)\leftarrow(c,d,2cu+a,2du+b),
+\]
+
+and update the lower bound to \(\max(v,u+1)\) for terms before the chosen maximum. A separate DFS builds the suffix after the chosen maximum, where the bound is \(\max(v,u)\).
+
+Prune immediately when even the smallest possible \(x\) already violates the numerator or denominator bound. The number of reachable states is small enough for the constraints; use 64-bit integers for the answer and recursion-stack-only DFS memory.

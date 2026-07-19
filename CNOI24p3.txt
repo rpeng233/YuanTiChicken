@@ -1,0 +1,23 @@
+Maintain a partial orientation and do unit propagation.
+
+For each remaining condition, look only at its tree path:
+
+- If the path already contains an oriented edge opposite to the forbidden direction, the condition is already satisfied and can be ignored.
+- If it is not yet satisfied and only one unoriented edge remains on the path, that edge is forced: orient it opposite to the path direction.
+- Otherwise it imposes no immediate choice.
+
+Process all forced edges with a queue. Whenever an edge is oriented, delete newly satisfied conditions and contract this edge for the still-active ones.
+
+If the queue becomes empty, then after contraction every active path has length at least two. In that case, a completion always exists: bipartition the remaining tree and orient all edges from one color class to the other, so no directed path of length at least two exists. Moreover, choosing either bipartition direction lets any chosen remaining edge take either direction. Therefore, for lexicographic minimization, orient the smallest-index still-unoriented edge as `0`, then continue propagation.
+
+Thus the algorithm is:
+
+1. Initialize all edges unoriented.
+2. Repeatedly:
+   - while there is a forced path, orient its only remaining edge oppositely and update affected paths;
+   - if no forced path exists, orient the smallest undecided edge as `0`.
+3. Output the resulting directions.
+
+For efficiency, root the tree and maintain contractions with DSU. Use binary lifting segments for paths. Each segment stores the number of still-unoriented edges on it, capped at `2`, and if the number is `1`, the identity of that edge. When an edge is oriented, update the affected doubling segments upward; whenever a condition’s total capped count becomes `1`, push it into the queue and verify it lazily before applying the forced orientation.
+
+Each segment changes state only constantly many times, so the total complexity is about `O((n + m) log n)` with `O((n + m) log n)` memory, or `O(n log n + m)` with the tighter doubling implementation.

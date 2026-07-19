@@ -1,0 +1,37 @@
+Reduce a fixed configuration to selecting some normalized intervals. After subtracting these intervals, every position must have remainder either `0` or at least `2`.
+
+Use a left-to-right DP with only nine states. Let `f[i][j][k]` mean: before processing position `i`, there are `j` old intervals chosen to cover `i`, and `k` intervals that must also cover `i+1`. It is enough to keep `j,k ∈ {0,1,2}` after normalization. At position `i`, enumerate `s ∈ {0,1,2}`, the number of new intervals starting at `i`. The temporary remainder is
+
+\[
+v=a_i-j-k-s.
+\]
+
+It is legal iff `v != 1` and `v >= 0`. Then choose the number `p` of old intervals continuing to the next position:
+
+\[
+p\in [k,\min(2,j+k)],
+\]
+
+and transition to state `(p,s)`.
+
+For added units, replace boolean reachability by minimum required additions. For each transition, the extra cost at position `i` is:
+
+- `-v` if `v < 0`,
+- `1` if `v = 1`,
+- `0` otherwise.
+
+Thus each state stores the minimum number of added units needed to reach it. A configuration is countable if the final state `(0,0)` has minimum cost at most `K`.
+
+The “at most” relaxation is valid for exact `K` except when `K=1`: subtract the all-zero configuration and, if `n=3`, the all-one configuration, because these are solvable with `0` additions but not with exactly `1`.
+
+To count over ranges, build an automaton whose node is the vector of the nine minimum costs, clipped to `K+1` or `101`. The initial vector has cost `0` at `(0,0)` and infinity elsewhere. Precompute transitions for values `0..6`, where value `6` represents all values `≥6` since larger values are equivalent in the DP.
+
+Then scan positions:
+
+\[
+dp_{i+1}[tr(S,x)] += dp_i[S]\cdot count_i(x),
+\]
+
+where `count_i(x)` is `1` for actual values `0..5` inside the interval, and for `x=6` is the number of allowed values at least `6`.
+
+Finally sum all automaton states whose `(0,0)` cost is at most `K`, apply the `K=1` corrections, and take the result modulo `1e9+7`. The number of reachable automaton states is small, about `8765`, so the complexity is linear in `n` times this constant.

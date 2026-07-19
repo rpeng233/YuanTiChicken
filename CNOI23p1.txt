@@ -1,0 +1,55 @@
+Build a suffix array for \(s+\text{rev}(s)\). For a candidate length \(l\), the reversed second block corresponds to the suffix starting at
+
+\[
+p=2n+2-i-2l .
+\]
+
+So it is first counted whenever
+
+\[
+rk_i < rk_p .
+\]
+
+For a query \((i,r)\), \(p\) ranges over
+
+\[
+[2n+2-i-2r,\; 2n-i]
+\]
+
+with fixed parity. Thus the number satisfying only this rank condition is a 2D dominance query over points \((p,rk_p)\): count points in that interval with rank greater than \(rk_i\). Process offline with two Fenwick trees, one for each parity.
+
+This overcounts the cases where the two compared length-\(l\) strings are actually equal. Equality means the length-\(2l\) block is an even palindrome. Run Manacher to get, for every center \(j\), the maximum even radius \(o_j\). Let \(j=i+l-1\). Then equality holds iff
+
+\[
+l\le o_j.
+\]
+
+For such equal cases, the previous rank condition reduces to
+
+\[
+rk_{j+1}<rk_{2n+1-j},
+\]
+
+which depends only on the center \(j\). So for every center satisfying this inequality, add a point
+
+\[
+(j,\; j-o_j+1).
+\]
+
+A query must subtract centers with
+
+\[
+i\le j\le i+r-1,\qquad j-o_j+1\le i.
+\]
+
+This is another offline Fenwick-tree dominance query.
+
+Final answer = first count − palindrome-equality overcount.
+
+Overall complexity:
+
+\[
+O((n+q)\log n)
+\]
+
+per test case.

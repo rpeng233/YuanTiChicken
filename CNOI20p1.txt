@@ -1,0 +1,37 @@
+Use max-plus matrix exponentiation.
+
+Define DP values as maximum obtainable score at each state. Since edge lengths are small, split every vertex `u` into 5 states `(u, 0..4)`, where `(u,0)` means being at `u`, and `(u,r)` means arriving at `u` after `r` more time units.
+
+Build a one-step transition matrix `M` under max-plus multiplication:
+
+\[
+(A \otimes B)_{i,j}=\max_k(A_{i,k}+B_{k,j})
+\]
+
+Transitions:
+
+- `(u,r) -> (u,r-1)` for `r > 1` with cost `0`;
+- `(u,1) -> (u,0)` with cost `c_u`;
+- for an original edge `u -> v` of length `w`:
+  - if `w = 1`, add `(u,0) -> (v,0)` with cost `c_v`;
+  - otherwise add `(u,0) -> (v,w-1)` with cost `0`.
+
+Initialize the vector with only the starting state valid, containing its initial vertex value.
+
+Sort all extra rewards by time. Between two consecutive reward times, advance the vector by multiplying it with `M^delta`. Precompute powers
+
+\[
+M, M^2, M^4, \dots
+\]
+
+so each jump is processed in `O((5n)^2 log T)` using vector-matrix multiplication. After reaching a reward time, if the corresponding city state is reachable, add the reward to that state.
+
+Finally, jump to the target time if needed and read the value of the starting city state. If it is still unreachable, output `-1`.
+
+Total complexity:
+
+\[
+O((5n)^3 \log T + k(5n)^2 \log T)
+\]
+
+using max-plus matrix multiplication and `-inf` for impossible states.

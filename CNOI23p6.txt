@@ -1,0 +1,14 @@
+Treat each colored cell as a unit square. For horizontal and vertical segments, convert them into thin rectangles and compute their union area with a sweep line and a segment tree over compressed x-coordinates. This gives the number already covered by non-diagonal operations.
+
+For diagonal segments, store each as `(d = y - x, l, r)`, where `[l, r]` is its x-range. Sort by `d`, merge overlapping or consecutive ranges with the same `d`, then process each merged diagonal independently.
+
+For one merged diagonal `(d, l, r)`, enumerate all horizontal and vertical segments to find cells on this diagonal that were already counted:
+
+- A horizontal segment at row `y` intersects it at `x = y - d`; count it if this x lies in both intervals.
+- A vertical segment at column `x` intersects it at `y = x + d`; count it if this y lies in the vertical interval and `x ∈ [l, r]`.
+
+Insert intersecting x-coordinates into a set to avoid double-counting. The new contribution of this diagonal is:
+
+`r - l + 1 - set.size()`
+
+Add this for all merged diagonals. Since the number of diagonal operations is constant, the total complexity is `O(q log q)` with `O(q)` memory.

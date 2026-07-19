@@ -1,0 +1,35 @@
+Preprocess each operation sequence into an array of effects by offset from the start. Between two moves to the right, all edits on one cell compose into one of four functions:
+
+\[
+0,\quad 1,\quad x,\quad 1-x
+\]
+
+where \(x\) is the original bit of that cell. Also record the number of right moves.
+
+Use inclusion–exclusion over the nonempty set \(S\) of positions that are required to be valid:
+
+\[
+\text{ans}=\sum_{S\ne\varnothing}(-1)^{|S|+1}\prod_i c_i(S)
+\]
+
+where \(c_i(S)\) is the number of input/output pairs for one sequence that make all starts in \(S\) produce the same output.
+
+For a fixed \(S\), if some chosen start would move out of bounds, then only the all-empty assignment works, so that sequence contributes \(1\). Otherwise, consider each cell independently. Collect the effect types induced on this cell by all chosen starts; starts not touching the cell contribute \(x\). The cell contribution is:
+
+- \(1\), if both \(0\) and \(1\) appear, or both \(x\) and \(1-x\) appear;
+- \(2\), if one constant type and one variable type appear;
+- \(3\), otherwise.
+
+Multiplying these over cells gives \(c_i(S)\).
+
+The direct enumeration of all \(S\) is too large, so split by the maximum chosen position \(p\). If \(p\) is in the first half, enumerate the subset directly. If \(p\) is in the second half, only the last \(n-p\) nearby chosen positions can affect a cell nontrivially; older chosen positions are equivalent to adding an \(x\) constraint. Do a rolling DP over positions with state \((mask, flag)\), where `mask` stores chosen positions in this short window and `flag` records whether any older chosen position exists. Choosing a position multiplies the DP value by \(-1\), implementing the inclusion–exclusion sign.
+
+To remove the extra factor \(m\), process all sequences simultaneously with four bitsets, one for each effect type. For a state, OR the precomputed bitsets of the selected offsets, then count how many sequences fall into contribution \(1,2,3\). The transition multiplier is therefore computed as \(2^a3^b\), where \(a\) is the number contributing \(2\) and \(b\) the number contributing \(3\).
+
+Precompute subset ORs by lowbit. The final complexity is about
+
+\[
+O\!\left(\frac{n\,2^{n/2}\,m}{w}\right)
+\]
+
+with bitset word size \(w\), which fits for \(n\le 32\).

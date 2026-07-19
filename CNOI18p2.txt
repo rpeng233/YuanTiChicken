@@ -1,0 +1,47 @@
+First characterize valid permutations: equality holds iff no element ever needs to move in both directions. This is equivalent to the permutation avoiding a decreasing subsequence of length 3, or equivalently being splittable into two increasing subsequences.
+
+For any valid prefix of length `m` with current maximum `x`, the number of valid completions depends only on `(m, x)`. If the next value is greater than `x`, it can be chosen freely as a new maximum; if it is smaller than `x`, it must be the smallest unused value, otherwise a decreasing triple will inevitably appear.
+
+This gives a Catalan-style DP. Let `cnt(m, x)` be the number of completions after a valid prefix of length `m` whose maximum is `x`. Interpreting the DP as lattice paths from `(m, x)` to `(n, n)` that never cross below the diagonal, reflection gives:
+
+```text
+cnt(m, x) =
+C(2n - m - x, n - m) - C(2n - m - x, n - m + 1)
+```
+
+Process the given permutation from left to right. Maintain:
+
+```text
+mx  = maximum of the fixed prefix
+mex = smallest unused value
+used[]
+```
+
+At position `i`, suppose previous positions are fixed equal to the given prefix. To make the whole permutation lexicographically larger at this position, the chosen value must be greater than `q[i]`. Such a value must be a new maximum, so it ranges from
+
+```text
+L = max(mx + 1, q[i] + 1)
+```
+
+to `n`. Summing `cnt(i, y)` over all `y >= L` simplifies to:
+
+```text
+add =
+C(2n - i - L + 1, n - i + 1)
+- C(2n - i - L + 1, n - i + 2)
+```
+
+Add this to the answer.
+
+Then try to keep the prefix equal by inserting `q[i]` itself:
+
+```text
+if q[i] > mx:
+    mx = q[i]
+else if q[i] != mex:
+    break
+mark q[i] as used
+advance mex while used[mex]
+```
+
+Precompute factorials and inverse factorials up to `2n` modulo `998244353`, treating invalid binomial arguments as zero. The total complexity is linear per test case after preprocessing.

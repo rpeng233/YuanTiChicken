@@ -1,0 +1,33 @@
+Represent each character by a fixed \(2\times2\) matrix, but maintain the sequence in reverse order:
+
+\[
+W=\begin{pmatrix}1&1\\0&1\end{pmatrix},\qquad
+E=\begin{pmatrix}2&-1\\1&0\end{pmatrix}.
+\]
+
+For the reversed operation string, let the matrix product be \(M\). Then the required fraction is
+
+\[
+\frac{M_{00}}{M_{00}+M_{01}}
+\]
+
+taken modulo \(998244353\).
+
+Use an implicit treap/splay to maintain the reversed string. Each node stores:
+
+- forward product of its interval;
+- backward product of its interval;
+- the same two products after flipping all characters.
+
+Lazy tags:
+
+- `rev`: swap children and swap forward/backward products;
+- `flip`: swap normal/flipped products and toggle the character.
+
+Operations become:
+
+- append a character: insert it at the front of the maintained reversed sequence;
+- flip \([l,r]\): convert to \([n-r+1,n-l+1]\), split it out, apply `flip`;
+- reverse \([l,r]\): convert the same way, split it out, apply `rev`.
+
+After each update, take the root’s forward product \(M\), output \(M_{00}\) and \(M_{00}+M_{01}\). Matrix multiplication and all values are modulo \(998244353\). The total complexity is \(O((n+q)\log(n+q))\).

@@ -1,0 +1,13 @@
+Use the chordal-graph structure.
+
+First handle existence: if \(s\) and \(t\) are separated by a bridge, output \(-1\). Otherwise, bridges outside the relevant 2-edge-connected part can be ignored.
+
+A path is invalid exactly when it contains a minimal separating subpath. In a chordal graph, every such subpath has strong structure: nonconsecutive vertices on it have chords, and any non-useful separating subpath can be shortcut, so only “normal” separating subpaths matter.
+
+Classify invalid subpaths of length 2 by their middle vertex. Such vertices can never appear in an answer, so mark them as forbidden. They are found with the block-cut tree: along the block-cut-tree path from \(s\) to \(t\), any vertex whose degree inside its biconnected component is exactly 2 becomes forbidden.
+
+For longer separating subpaths, use the fact that normal ones are pairwise disjoint in edges and internal vertices. This allows an auxiliary shortest-path construction. For each internal vertex of a forbidden separating subpath, make two states: one meaning the path is still “dangerously” following that subpath, and one meaning it has safely left it. Add directed transitions corresponding to original edges, but forbid transitions that would complete an entire forbidden separating subpath or revisit it in an invalid way. Run Dijkstra on this auxiliary graph; this gives the shortest path avoiding the chosen set.
+
+It remains to choose a sufficient set of normal separating subpaths. First compute the shortest path avoiding only bad vertices. From it, find the separating subpaths lying on each side using biconnected components and contraction/parity tricks. Then temporarily delete bad vertices and the critical end edges of those side-separators, find another shortest path, and extract all normal separating subpaths contained in it. This extraction is done by removing the path edges, labeling connected components, and using a two-pointer scan with parity/component conditions.
+
+Finally run the auxiliary Dijkstra with the union of these separators. The resulting distance is the answer. The total complexity is linear apart from Dijkstra, i.e. \(O(m+n\log n)\), with linear memory.

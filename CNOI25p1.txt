@@ -1,82 +1,35 @@
-Solution Summary
+Use Dijkstra on a layered state graph.
 
-Model the robot’s state as ((u,p)), where it is at vertex (u) with parameter (p).
+Let `dist[u][p]` be the minimum cost to be at node `u` with a usable parameter value `p`, where only `1 <= p <= d[u]` states are stored. The total number of states is
 
-Creating all (n k) states is too large. At vertex (u), only parameter values
+\[
+\sum d[u] = m.
+\]
 
-[
-1\le p\le d_u
-]
+For each state `(u, p)`:
 
-are useful, because only these values select an outgoing edge. Thus, create states
+- If `p > 1`, relax `(u, p-1)` with cost `w[p]`.
+- If `p < d[u]`, relax `(u, p+1)` with cost `v[p]`.
+- Let the `p`-th outgoing edge of `u` go to `to` with cost `c`.
+  - Update `ans[to]` with `dist[u][p] + c`.
+  - If `d[to] > 0`:
+    - If `p <= d[to]`, relax `(to, p)` with cost `c`.
+    - Otherwise relax `(to, d[to])` with extra cost for decreasing `p` down to `d[to]`.
 
-[
-(u,1),(u,2),\ldots,(u,d_u).
-]
+Precompute prefix sums of the decreasing costs so that
 
-The total number of states is
+\[
+\text{cost}(p \to q)=\sum_{i=q+1}^{p} w_i
+\]
 
-[
-\sum_u d_u=m.
-]
+is obtained in \(O(1)\).
 
-Transitions
+The key observation is that states with `p > d[u]` never need to be stored: from such a state no outgoing edge can be used, so the parameter must first be decreased into the valid range. It is enough to jump directly to `d[u]`, and further decreases are handled by normal adjacent transitions.
 
-For each vertex (u):
+Initialize `dist[1][1] = 0` if valid, and `ans[1] = 0`. Run Dijkstra over the implicit graph. There are \(O(m)\) states and transitions, so the complexity is
 
-Add ((u,p)\to(u,p+1)) with cost (v_p).
-Add ((u,p)\to(u,p-1)) with cost (w_p).
+\[
+O(m \log m)
+\]
 
-Suppose the (p)-th outgoing edge of (u) goes to (y) with cost (z).
-
-If (p\le d_y), add
-
-[
-(u,p)\to(y,p)
-]
-
-with cost (z).
-
-If (p>d_y>0), after reaching (y), the parameter must be decreased before another edge can be used. Add
-
-[
-(u,p)\to(y,d_y)
-]
-
-with cost
-
-[
-z+\sum_{i=d_y+1}^{p}w_i.
-]
-
-Use prefix sums of (w_i) to compute this cost in (O(1)).
-
-Run Dijkstra’s algorithm from state ((1,1)).
-
-For every reachable state ((u,p)), update the answer for (u). Also, if the (p)-th outgoing edge goes to (y) with cost (z), update
-
-\min\bigl(\operatorname{ans}[y],
-\operatorname{dist}(u,p)+z\bigr).
-]
-
-This second update handles routes that end immediately after entering (y), even when (p>d_y).
-
-Correctness
-
-Every time the robot traverses an edge from (u), its parameter is one of (1,\ldots,d_u), so every relevant decision is represented by a compressed state.
-
-If the robot reaches (y) with (p>d_y) and continues moving, it must decrease (p). Decreasing first to (d_y) loses nothing, since any smaller parameter can then be reached through the usual decrement transitions.
-
-Therefore, the compressed graph represents every useful robot route with the same cost, and Dijkstra finds the minimum cost to every vertex.
-
-Complexity
-
-The compressed graph has (m) states and (O(m)) edges.
-
-[
-\boxed{O((n+m)\log(n+m))\text{ time}}
-]
-
-[
-\boxed{O(n+m)\text{ memory}}
-]
+with \(O(n+m)\) memory.

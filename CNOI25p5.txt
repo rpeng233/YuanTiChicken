@@ -1,0 +1,56 @@
+Use Möbius inversion on mask equality:
+\[
+[X=Y]=\sum_{S\subseteq X}\sum_{T\subseteq Y}(-1)^{|S|+|T|}2^{|S\cap T|}.
+\]
+
+For fixed \(S,T\), \(S\subseteq f(P)\) means every chosen element of \(P\) must be a supermask of \(S\). Let
+\[
+R_S=\{x\mid S\subseteq x\}.
+\]
+The disjointness condition can then be handled independently for every \(x\): if \(x\in R_S\cap R_T\), it contributes \(1+2a_x\); if it is in exactly one of them, it contributes \(1+a_x\).
+
+Define
+\[
+K(S)=\prod_{x\supseteq S}(1+a_x),\qquad
+G(S)=\prod_{x\supseteq S}(1+2a_x).
+\]
+Then the contribution for fixed \(S,T\) is
+\[
+K(S)K(T)\frac{G(S\cup T)}{K(S\cup T)^2}.
+\]
+So
+\[
+Ans=\sum_{S,T}(-1)^{|S|+|T|}2^{|S\cap T|}
+K(S)K(T)\frac{G(S\cup T)}{K(S\cup T)^2}.
+\]
+
+Use
+\[
+|S\cap T|=|S|+|T|-|S\cup T|.
+\]
+Let
+\[
+F(S)=(-2)^{|S|}K(S),
+\]
+and compute the OR-convolution
+\[
+H(R)=\sum_{S\cup T=R}F(S)F(T).
+\]
+Then
+\[
+Ans=\sum_R H(R)\frac{G(R)}{2^{|R|}K(R)^2}.
+\]
+
+Compute \(K,G\) by superset-product DP. Compute \(H\) with OR-FWT: transform \(F\), square pointwise, then inverse transform.
+
+If some \(1+a_x\equiv0\pmod p\), avoid direct division by treating each such \(a_x\) as \(-1+z\) and storing only the lowest Laurent term \(c z^e\). Multiplication/division add or subtract exponents; addition/subtraction keeps the smaller exponent, combining coefficients when exponents match. In the final sum, only exponent \(0\) contributes.
+
+The complexity is
+\[
+O(n2^n)
+\]
+time and
+\[
+O(2^n)
+\]
+memory.

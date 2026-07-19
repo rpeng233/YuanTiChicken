@@ -1,0 +1,30 @@
+Build a static top-tree over the original tree.
+
+Each leaf cluster is one edge. Each internal cluster is obtained by either:
+
+- compressing two path-adjacent clusters;
+- raking a side cluster onto another cluster.
+
+Construct it in a globally balanced way, e.g. by heavy-light decomposition plus weighted divide-and-conquer/Huffman-style merging, so the height is \(O(\log n)\) and the total sum of maintained cluster sizes/diameters is \(O(n\log n)\).
+
+For every cluster \(x\), let its boundary vertices be \(a,b\). Maintain:
+
+- `all[x]`: information of the whole cluster;
+- `in[x][0/1][r]`: information inside the cluster within distance \(r\) from boundary \(a\) or \(b\);
+- `out[x][0/1][r]`: information outside the cluster within distance \(r\) from boundary \(a\) or \(b\).
+
+Compute `in` bottom-up while building the top-tree. For a compress node, combine the two children with the compress operation, subtracting the distance to the shared boundary when entering the other child. For a rake node, combine the main child and side child with the rake operation. Empty or negative-radius parts are treated as the identity.
+
+Then compute `out` top-down by rerooting on the top-tree. For each child, its outside part is formed from the parent’s outside part plus the sibling cluster’s inside part, again using the same merge type as the parent node. To save one merge during queries, pre-merge the child’s whole-cluster information into the appropriate outside table.
+
+For a query \((u,d)\), start from a leaf cluster incident to \(u\), climb in the top-tree to the highest cluster that is fully contained in the radius-\(d\) ball around \(u\). Its parent is not fully contained, so the remaining uncovered part can only extend from the two boundary vertices of this cluster. If the boundaries are \(a,b\), the answer is obtained from
+
+\[
+out[x][a][d-\operatorname{dist}(u,a)]
+\quad\text{and}\quad
+out[x][b][d-\operatorname{dist}(u,b)]
+\]
+
+combined once by the compress operation, with negative radii ignored.
+
+Distances between original-tree vertices are answered by LCA. The preprocessing uses \(O(n\log n)\) merge calls and memory, while each query uses \(O(\log n)\) ordinary time and only \(O(1)\) merge calls.

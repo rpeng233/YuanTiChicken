@@ -1,0 +1,40 @@
+Root the tree at 1 and compute depths. For each lower endpoint \(x\), keep only the deepest upper endpoint depth among all constraints ending at \(x\); call it \(lim[x]\). Shallower ones are redundant.
+
+Use tree DP. Let
+
+\[
+f_u[d]
+\]
+
+be the number of ways inside the subtree of \(u\) such that the deepest still-uncovered constraint reaching upward has depth \(d\). Let \(d=0\) mean no uncovered constraint remains. Initially:
+
+\[
+f_u[lim[u]] = 1
+\]
+
+Then merge each child \(v\) into \(u\). Let
+
+\[
+G_u[d] = \sum_{i=0}^{d} f_u[i].
+\]
+
+When considering the edge between \(u\) and \(v\):
+
+- if it is chosen, all pending constraints from \(v\) with depth \(\le dep[u]\) are satisfied;
+- if it is not chosen, the remaining pending depth is the maximum of the two sides.
+
+Thus for every depth \(d\):
+
+\[
+f_u[d] \leftarrow f_u[d]\bigl(G_v[d]+G_v[dep[u]]\bigr)+f_v[d]G_u[d-1].
+\]
+
+This transition can be done by merging dynamic segment trees over depth indices. Each node’s segment tree stores the DP values and their sum, with lazy multiplication tags. During a left-to-right segment-tree merge, maintain the current prefix sums of both DP arrays; when one side is empty, multiply the whole interval by the appropriate prefix value.
+
+After processing all children, the answer is:
+
+\[
+f_1[0].
+\]
+
+The complexity is \(O(n\log n+m)\) time and \(O(n\log n)\) memory.

@@ -1,0 +1,22 @@
+Represent each batch as an undirected graph on the remaining candidates, with one comparison per edge. After receiving answers, remove every vertex that loses at least once.
+
+To reduce \(n\) candidates to at most \(m\) candidates in one batch with the fewest comparisons, the graph must have independence number at most \(m\); otherwise an adversary can keep all vertices of a larger independent set possible. By Turán’s theorem on the complement graph, the optimal graph is a disjoint union of \(m\) cliques with sizes as equal as possible. Therefore the one-batch cost is
+
+\[
+w(m,n)= (m-r)\binom q2+r\binom{q+1}2,
+\quad q=\lfloor n/m\rfloor,\ r=n\bmod m.
+\]
+
+Use dynamic programming:
+
+\[
+f[k][n]=\min_m \{f[k-1][m]+w(m,n)\},
+\]
+
+where \(f[0][1]=0\) and other \(f[0][n]\) are infinite. Store the minimizing \(m\) to reconstruct the grouping plan.
+
+The transition has monotone optimal decisions because \(w\) satisfies the quadrangle inequality; equivalently, the marginal cost of increasing \(n\) decreases as \(m\) increases. Thus the DP can be computed with divide-and-conquer optimization in about \(O(KN\log N)\), or precomputed and hardcoded for the fixed limits.
+
+During execution, maintain the current candidate list. For each stored \(m\), split the candidates into \(m\) nearly equal groups, compare all pairs inside every group in one batch, and delete every loser. Repeat until one candidate remains.
+
+For the small one-batch case, simply compare every unordered pair once and return the only candidate that never loses.

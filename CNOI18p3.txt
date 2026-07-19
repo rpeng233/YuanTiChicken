@@ -1,0 +1,25 @@
+Build a suffix automaton for the fixed string.
+
+For each SAM state, maintain its `endpos` set with a dynamic segment tree over positions. When inserting position `i`, put `i` into the segment tree of the newly created state. After the SAM is built, process states in decreasing `len` order and merge each state’s segment tree into its suffix-link parent. Then each state can answer whether some occurrence ends in a given interval in `O(log n)`.
+
+For one query, scan the query string on this SAM and compute:
+
+`p[i] = longest length of a suffix ending at i that appears inside the required interval`.
+
+Maintain the current SAM state `u` and current matched length `cur`. When trying to append character `c`, the transition to `v = next[u][c]` is valid only if `v` has an end position `pos` such that the matched substring lies fully inside the interval, i.e. query the segment tree of `v` on the corresponding valid end-position range. If invalid, decrease `cur` by one; when `cur` falls to `len[link[u]]`, move `u` to `link[u]`. This gives all `p[i]` in amortized `O(|T| log |S|)`.
+
+Then build a suffix automaton for the query string itself. Each state represents distinct substrings with lengths:
+
+`len[link[x]] + 1 ... len[x]`.
+
+Let `rep[x]` be any ending position represented by state `x`, usually the first/rightmost position stored during construction. Among this state’s substrings, those with length `<= p[rep[x]]` already appear in the forbidden interval, while lengths `<= len[link[x]]` belong to ancestor states. Therefore the contribution of state `x` is:
+
+`max(0, len[x] - max(len[link[x]], p[rep[x]]))`.
+
+Sum this over all non-root states of the query SAM.
+
+Overall complexity is:
+
+`O(|S| log |S| + sum |T| log |S|)`
+
+with linear SAM size and dynamic segment-tree-merge storage.

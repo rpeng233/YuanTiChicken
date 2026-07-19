@@ -1,0 +1,51 @@
+Root the tree. Let \(D_x\) be the weighted distance from the root and \(\operatorname{dist}(x,y)\) be computed with LCA.
+
+Keep the answer doubled. For one path \((x,y)\) with cost \(w\), define
+
+\[
+c=\operatorname{dist}(x,y)-2w .
+\]
+
+For two intersecting paths, orient their endpoints as \((u_1,v_1)\), \((u_2,v_2)\) so that \(t=\operatorname{lca}(u_1,u_2)\) is one end of their intersection. Then the doubled contribution is
+
+\[
+c_1+c_2+\operatorname{dist}(u_1,u_2)+\operatorname{dist}(v_1,v_2).
+\]
+
+For fixed \(t\),
+
+\[
+\operatorname{dist}(u_1,u_2)=D_{u_1}+D_{u_2}-2D_t,
+\]
+
+so we only need to maximize
+
+\[
+(c_1+D_{u_1})+(c_2+D_{u_2})+\operatorname{dist}(v_1,v_2)-2D_t.
+\]
+
+Thus each original path generates candidate weighted points. For path \((x,y)\), let \(r=\operatorname{lca}(x,y)\). If \(x\ne r\), insert a candidate on the chain from \(x\) upward to just below \(r\):
+
+\[
+\text{point}=y,\qquad \text{weight}=c+D_x.
+\]
+
+Do the symmetric insertion for \(y\ne r\). Schedule each candidate to be deleted at the child of \(r\) lying on that side, so it is active exactly for valid split nodes.
+
+During a bottom-up DFS, each node maintains the active candidates in its subtree. When merging two child sets at node \(t\), update the answer with the best pair formed by one candidate from each set, minus \(2D_t\). Then merge the sets. Candidates starting at the current node are inserted before merging; candidates whose valid range ends here are deleted after processing this node.
+
+The set structure only needs to maintain a weighted tree diameter: for weighted points \((p,w)\), the value of a pair is
+
+\[
+w_1+w_2+\operatorname{dist}(p_1,p_2).
+\]
+
+When merging two sets, the new diameter is found by checking the old diameter endpoints of both sets, i.e. only constant many pairs. Use a dynamic segment tree or meldable structure to support insertion, deletion by path id, and set merging.
+
+If no valid pair is ever found, output `F`; otherwise output the doubled answer divided by \(2\). The complexity is
+
+\[
+O((n+m)\log n)
+\]
+
+per test case, with LCA preprocessing.

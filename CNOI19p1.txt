@@ -1,0 +1,42 @@
+Sort all trips by departure time. Define `f[i]` as the minimum accumulated waiting cost after taking trip `i`, excluding the final arrival-time term.
+
+Add a dummy trip ending at station `1` at time `0` with `f = 0`.
+
+For a valid previous trip `j` transferring to trip `i`:
+
+\[
+f_i = f_j + A(p_i-q_j)^2+B(p_i-q_j)+C
+\]
+
+Expanding:
+
+\[
+f_i =
+A p_i^2+Bp_i+C+
+\min_j \left(f_j+Aq_j^2-Bq_j-2A p_i q_j\right)
+\]
+
+So for each station, maintain a convex hull of points/lines contributed by trips that have already arrived there.  
+A previous trip `j` contributes:
+
+\[
+x=q_j,\quad y=f_j+Aq_j^2-Bq_j
+\]
+
+For current trip `i`, query the hull of its starting station with slope `2A p_i` to get:
+
+\[
+\min(y - 2A p_i x)
+\]
+
+Then add `A p_i^2 + Bp_i + C` to obtain `f[i]`.
+
+To ensure only valid transfers are used, sweep trips in increasing departure time, while inserting into hulls all trips whose arrival time is not later than the current departure time. Since arrivals and query slopes are monotonic after sorting, each station’s hull can be maintained with a standard monotone convex hull.
+
+Whenever a trip reaches the destination, update:
+
+\[
+ans=\min(ans, f_i+q_i)
+\]
+
+The total complexity is dominated by sorting; the DP and hull operations are linear after sorting, so the solution runs in `O(m log m)` time and `O(m)` memory.
